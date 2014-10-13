@@ -441,8 +441,8 @@ def soda_log(level, msg):
 
 @jsonrpc.method('Bob.adduserbarcode')
 def bob_adduserbarcode(barcode):
-    userid = sessionmanager.sessions[SessionLocation.computer].user.user.userid
-    return adduserbarcode(userid, barcode)
+    user = sessionmanager.sessions[SessionLocation.computer].user.user
+    return adduserbarcode(user, barcode)
 
 @jsonrpc.method('Bob.getuserbarcode')
 def bob_getuserbarcode(barcode):
