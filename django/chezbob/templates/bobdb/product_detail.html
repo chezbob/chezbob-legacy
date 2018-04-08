@@ -20,7 +20,7 @@
 
 <tbody>
 {% for i in product.sales_stats %}
-<tr class="{% cycle row1,row2 %}">
+<tr class="{% cycle "row1" "row2" %}">
     <td>{{ i.0 }}</td>
     <td>{{ i.1 }}</td>
 </tr>

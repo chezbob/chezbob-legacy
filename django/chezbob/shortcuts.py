@@ -5,7 +5,6 @@ from django.db.models.query import QuerySet
 from django.core.serializers import json, serialize
 from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect, HttpResponse
-from django.utils import simplejson
 
 class JsonResponse(HttpResponse):
   def __init__(self, data, *args, **kwargs):
@@ -13,7 +12,7 @@ class JsonResponse(HttpResponse):
     if isinstance(data, QuerySet):
       content = serialize('json', data)
     else:
-      content = simplejson.dumps(data, indent=2, cls=json.DjangoJSONEncoder,
+      content = json.dumps(data, indent=2, cls=json.DjangoJSONEncoder,
                            ensure_ascii=False)
     kwargs['content_type'] = 'application/json'
     super(JsonResponse, self).__init__(content, *args, **kwargs)
@@ -71,6 +70,3 @@ def redirect_or_error(to_url, messages):
     return error(messages)
   else:
     return HttpResponseRedirect(to_url)
-
-
-    

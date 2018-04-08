@@ -30,7 +30,7 @@
 {% endif %}
 
 {% for item in location.items %}
-<tr class="{% cycle row1,row2 %}">
+<tr class="{% cycle "row1" "row2" %}">
     <input type="hidden" name="id.{{ item.counter }}" value="{{ item.type.bulkid }}" />
     <input type="hidden" name="old_count.{{ item.counter }}" value="{{ item.count }}" />
     <input type="hidden" name="old_cases.{{ item.counter }}" value="{{ item.count_cases }}" />

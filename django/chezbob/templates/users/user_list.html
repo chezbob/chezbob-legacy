@@ -51,10 +51,10 @@ $(document).ready(function() {
 <tbody>
 {% for user in users %}
 <tr onclick="window.location
-             .href='{% url chezbob.users.views.user_details user.id %}';">  
+             .href='{% url "chezbob.users.views.user_details" user.id %}';">  
   <td>{{ user.id }}</td> 
   <td>
-    <a href="{% url chezbob.users.views.user_details user.id %}">
+    <a href="{% url "chezbob.users.views.user_details" user.id %}">
       {{ user.username }}
     </a>
   </td> 

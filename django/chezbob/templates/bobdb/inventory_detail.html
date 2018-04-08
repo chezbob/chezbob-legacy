@@ -27,7 +27,7 @@
 
 <tbody>
 {% for i in stats %}
-<tr class="{% cycle row1,row2 %}">
+<tr class="{% cycle "row1" "row2" %}">
     <td>{{ i.date }}</td>
     <td>{{ i.sales }}</td>
     <td>{{ i.purchases }}</td>

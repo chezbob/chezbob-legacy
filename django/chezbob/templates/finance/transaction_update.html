@@ -34,7 +34,7 @@
 
 <tbody>
 {% for split in splits %}
-<tr class="{% cycle row1,row2 %}">
+<tr class="{% cycle "row1" "row2" %}">
     <td>
         {{ split.id }}
         <input type="text" name="note.{{ forloop.counter }}" value="{{ split.memo }}" />

@@ -53,9 +53,9 @@ $(document).ready(function() {
 </thead>
 <tbody>
 {% for order in orders %}
-<tr onclick="window.location.href='{{ order.id }}';"><!-- % url chezbob.orders.views.order_summary, order.id %--> 
+<tr onclick="window.location.href='{{ order.id }}';"><!-- % url "chezbob.orders.views.order_summary", order.id %--> 
   <td>
-    <a href='{{order.id}}'><!-- % url chezbob.orders.views.order_summary, order.id %-->
+    <a href='{{order.id}}'><!-- % url "chezbob.orders.views.order_summary", order.id %-->
       {{ order.date }}
     </a>
   </td> 

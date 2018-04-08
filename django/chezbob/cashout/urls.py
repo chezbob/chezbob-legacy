@@ -1,11 +1,14 @@
-from django.conf.urls.defaults import *
 
-urlpatterns = patterns('chezbob.cashout.views',
-        (r'^(\d+)/$', 'edit_cashout'),
-        (r'^new/$', 'edit_cashout'),
-        (r'^ledger/$', 'ledger'),
-        (r'^onhand/$', 'cashonhand'),
-        (r'^$', 'ledger'),
-        (r'gen_tr/(\d+)/$', 'gen_transaction'),
-        (r'^losses/$', 'show_losses'),
-        )
+import chezbob.cashout.views as cbv
+
+from django.conf.urls import *
+
+urlpatterns = [
+    url(r'^(\d+)/$', cbv.edit_cashout),
+    url(r'^new/$', cbv.edit_cashout),
+    url(r'^ledger/$', cbv.ledger),
+    url(r'^onhand/$', cbv.cashonhand),
+    url(r'^$', cbv.ledger),
+    url(r'gen_tr/(\d+)/$', cbv.gen_transaction),
+    url(r'^losses/$', cbv.show_losses),
+]

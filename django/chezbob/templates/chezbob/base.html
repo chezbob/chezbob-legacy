@@ -7,9 +7,10 @@
     <script type="text/javascript" src="/js/tablesorter/jquery.tablesorter.js"></script>
     <script type="text/javascript" src="/js/tablesorter/jquery.tablesorter.pager.js"></script>
     <link rel="stylesheet" type="text/css" href="/js/tablesorter/style.css" />
-    <link rel="stylesheet" type="text/css" href="{% block stylesheet %}{% load adminmedia %}{% admin_media_prefix %}css/base.css{% endblock %}" />
-    <link rel="stylesheet" type="text/css" href="{% block forms_stylesheet %}{% load adminmedia %}{% admin_media_prefix %}css/forms.css{% endblock %}" />
-    <link rel="stylesheet" type="text/css" href="{% block changelists_stylesheet %}{% load adminmedia %}{% admin_media_prefix %}css/changelists.css{% endblock %}" />
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% block stylesheet %}{% static "admin/css/base.css" %}{% endblock %}" />
+    <link rel="stylesheet" type="text/css" href="{% block forms_stylesheet %}{% static "admin/css/forms.css" %}{% endblock %}" />
+    <link rel="stylesheet" type="text/css" href="{% block changelists_stylesheet %}{% static "admin/css/changelists.css" %}{% endblock %}" />
     {% block html_headers %}{% endblock %}
 </head>
 
@@ -26,7 +27,7 @@
         <a href="/admin/cashout/">Cashouts</a> |
         <a href="/admin/inventory/">Inventory</a> |
         <a href="/admin/orders/">Orders</a> |
-        <a href="{% url chezbob.users.views.user_list %}">Users</a> |
+        <a href="{% url "chezbob.users.views.user_list" %}">Users</a> |
         <a href="/admin/django/">Database</a> |
         <a href="/admin/query/">Queries</a> |
         <a href="/admin/django/logout/">Logout</a>

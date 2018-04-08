@@ -33,7 +33,7 @@ to: <input type="text" name="to" value="{{ date_to }}" />
 
 <tbody>
 {% for item in items %}
-<tr class="{% cycle row1,row2 %}">
+<tr class="{% cycle "row1" "row2" %}">
     <input type="hidden" name="id.{{ forloop.counter }}" value="{{ item.type.bulkid }}" />
     <td>
         <span style="font-weight: bold">{{ item.type.description }}</span>

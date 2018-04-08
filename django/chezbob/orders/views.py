@@ -41,7 +41,7 @@ def order_list(request):
   mes = BobMessages()
   mes['orders'] = Order.objects.all().order_by('-date')
   mes['title']  = "List of Orders"
-  reverse('chezbob.orders.views.order_summary', args=(167,))
+  reverse(order_summary, args=(167,))
   return render_to_response('orders/order_list.html', mes)
 
 class OrderForm(forms.Form):
@@ -381,7 +381,7 @@ def new_order(request):
                        tax_rate = order_form.cleaned_data['sales_tax_rate'])
       newOrder.save()
       newId = newOrder.id
-      return redirect_or_error(reverse('chezbob.orders.views.order_summary', args=(newId,)), messages)
+      return redirect_or_error(reverse(order_summary, args=(newId,)), messages)
     else:
       for error_field in order_form.errors:
         messages.error("Field %s: %s" % (error_field, order_form[error_field].errors));

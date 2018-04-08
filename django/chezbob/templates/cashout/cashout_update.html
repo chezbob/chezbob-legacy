@@ -41,7 +41,7 @@
 
 <tbody>
 {% for count in cashcounts %}
-<tr class="{% cycle row1,row2 %}">
+<tr class="{% cycle "row1" "row2" %}">
     <td>
         {{ count.id }}
         <input type="text" name="memo.{{ forloop.counter }}" value="{{ count.memo }}" />

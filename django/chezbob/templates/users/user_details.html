@@ -3,29 +3,29 @@
 {% block html_headers %}
 <script tyep="text/javascript">
 // <![CDATA[
-$(document).ready(function() { 
+$(document).ready(function() {
   $("#transactionsTable")
     .tablesorter({ widgets: ['zebra'] })
     .tablesorterPager({container: $("#pager_top"), positionFixed: false, size: 10});
-} 
+}
 );
 // ]]>
 </script>
 
 <style>
-  fieldset 
+  fieldset
     { margin-bottom:10px;
       padding:5px; }
-  fieldset input[type="submit"] 
+  fieldset input[type="submit"]
     { text-align:center; }
-  fieldset input[type="text"] 
+  fieldset input[type="text"]
     { width:150px; }
   .tool_button
     { width:300px; }
   .pagedisplay
     { width:70px;
       text-align: center; }
-  label 
+  label
     { width:150px;
       display:inline-block;}
 </style>
@@ -35,14 +35,14 @@ $(document).ready(function() {
 
 {% block pretitle %}
 <div>
-  <a href="{% url chezbob.users.views.user_list %}">&lt;&lt; Back to all Users</a>
+  <a href="{% url "chezbob.users.views.user_list" %}">&lt;&lt; Back to all Users</a>
 </div>
 {% endblock%}
 
 {% block content %}
 
 <div>
-  <h2>Details</h2> 
+  <h2>Details</h2>
   <form method="post">
     <fieldset>
       <legend>Profile</legend>
@@ -79,7 +79,7 @@ $(document).ready(function() {
     {% if form.show %}
     <fieldset>
     {% else %}
-    <input type="submit" value="{{ form.title }}" name="{{ form.type }}_open" class="tool_button"/> 
+    <input type="submit" value="{{ form.title }}" name="{{ form.type }}_open" class="tool_button"/>
     <fieldset style="display:none;">
     {% endif %}
       <legend>{{ form.title }}</legend>
@@ -114,34 +114,34 @@ $(document).ready(function() {
   <table cellspacing="0" id="transactionsTable" class="tablesorter">
     <thead>
       <tr>
-        <th>time</th> 
-        <th>value</th> 
-        <th>type</th> 
-        <th>barcode</th> 
+        <th>time</th>
+        <th>value</th>
+        <th>type</th>
+        <th>barcode</th>
         <th>source</th>
         <th>tools</th>
       </tr>
     </thead>
     <tbody>
       {% for transaction in transactions %}
-      <tr onclick="window.location.href='{% url chezbob.users.views.user_details user.id %}';" >  
-        <td>{{ transaction.time|date:"Y/m/d, H:i:s" }}</td> 
-        <td style="text-align:right">${{ transaction.value }}</td> 
-        <td>{{ transaction.type }}</td> 
-        <td>{{ transaction.barcode }}</td> 
-        <td>{{ transaction.source }}</td> 
+      <tr onclick="window.location.href='{% url 'chezbob.product_detail' transaction.barcode|default:"1" %}';" >
+        <td>{{ transaction.time|date:"Y/m/d, H:i:s" }}</td>
+        <td style="text-align:right">${{ transaction.value }}</td>
+        <td>{{ transaction.type }}</td>
+        <td>{{ transaction.barcode }}</td>
+        <td>{{ transaction.source }}</td>
         <td>
-            <!--<input type="submit" 
-                       value="Edit" 
-                       name="edit_tran_{{ transaction.id }}" 
+            <!--<input type="submit"
+                       value="Edit"
+                       name="edit_tran_{{ transaction.id }}"
                        style="padding:1px 5px 1px 5px"/>-->
             {% ifnotequal transaction.type "INIT" %}
-            <input type="submit" 
-                   value="Delete" 
-                   name="delete_tran_{{ transaction.id }}" 
+            <input type="submit"
+                   value="Delete"
+                   name="delete_tran_{{ transaction.id }}"
                    style="padding:1px 5px 1px 5px"/>
             {% endifnotequal %}
-        </td> 
+        </td>
       </tr>
       {% endfor %}
     </tbody>

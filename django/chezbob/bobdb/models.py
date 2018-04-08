@@ -127,7 +127,7 @@ class Product(models.Model):
         return "%s [%s]" % (self.name, self.barcode)
 
     def get_absolute_url(self):
-        return "/products/%s/" % (self.barcode)
+        return "/admin/products/%s/" % (self.barcode)
 
     def sales_stats(self):
         """Return a list with historical sales per day."""

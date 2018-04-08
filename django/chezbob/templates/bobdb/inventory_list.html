@@ -12,7 +12,7 @@
 
 <tbody>
 {% for item in items %}
-<tr class="{% cycle row1,row2 %}">
+<tr class="{% cycle "row1" "row2" %}">
     <td><a href="{{ item.bulkid }}/">{{ item.description }}</a></td>
 </tr>
 {% endfor %}

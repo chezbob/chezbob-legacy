@@ -16,7 +16,7 @@
 
 <tbody>
 {% for product in products %}
-<tr class="{% cycle row1,row2 %}">
+<tr class="{% cycle "row1" "row2" %}">
     <td><a href="{{product.barcode}}/">{{ product.name }}</a></td>
     <td>{{ product.price|stringformat:".2f" }}</td>
     <td>{{ product.bulk.unit_price|stringformat:".4f" }}</td>

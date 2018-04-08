@@ -18,7 +18,7 @@
 
 <tbody>
 {% for item in items %}
-<tr class="{% cycle row1,row2 %}">
+<tr class="{% cycle "row1" "row2" %}">
     <td style="text-align: right">{{ item.number }} &times; {{ item.quantity }}</td>
     <td>{{ item.bulk_type }}</td>
     <td>{{ item.cost_nontaxable|stringformat:".2f" }} + {{ item.cost_taxable|stringformat:".2f" }}T</td>

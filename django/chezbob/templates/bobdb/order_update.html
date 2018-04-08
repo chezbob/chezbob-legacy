@@ -19,7 +19,7 @@
 
 <tbody>
 {% for item in items %}
-<tr class="{% cycle row1,row2 %}">
+<tr class="{% cycle "row1" "row2" %}">
     <input type="hidden" name="id.{{ forloop.counter }}" value="{{ item.id }}" />
     {% if item.blank %}
         <td>
