@@ -1,4 +1,4 @@
-from django.conf.urls import *
+from django.conf.urls import url, include
 
 from django.contrib import admin
 
@@ -16,8 +16,10 @@ admin.autodiscover()
 urlpatterns = [
     # Chez Bob products, pricing, and inventory
     url(r'^products/$', cbdbv.products),
-    url(r'^products/(.+)/$', cbdbv.product_detail, name='chezbob.product_detail'),
-    #url(r'^products/([0-9]+)/$', cbdbv.product_detail, name='chezbob.product_detail'),
+    url(r'^products/(.+)/$',
+        cbdbv.product_detail, name='chezbob.product_detail'),
+    #url(r'^products/([0-9]+)/$', cbdbv.product_detail,
+    #    name='chezbob.product_detail'),
     #url(r'^orders/([0-9]+)/$', cbdbv.view_order),
     #url(r'^orders/([0-9]+)/update/$', cbdbv.update_order),
     url(r'^orders/$', cov.order_list),
@@ -28,7 +30,8 @@ urlpatterns = [
 
     url(r'^inventory/$', cbdbv.list_inventories),
     url(r'^inventory/(\d{4}-\d{1,2}-\d{1,2})/$', cbdbv.take_inventory),
-    url(r'^inventory/(\d{4}-\d{1,2}-\d{1,2} \d{2}:\d{2}:\d{2})/$', cbdbv.take_inventory),
+    url(r'^inventory/(\d{4}-\d{1,2}-\d{1,2} \d{2}:\d{2}:\d{2})/$',
+        cbdbv.take_inventory),
     url(r'^inventory/order/$', cbdbv.estimate_order),
     url(r'^inventory/order/print/$', cbdbv.display_order),
 
@@ -45,7 +48,8 @@ urlpatterns = [
 
     # User Management
     url(r'^users/$', cuv.user_list, name='chezbob.users.views.user_list'),
-    url(r'^user/(\w+)/$', cuv.user_details, name='chezbob.users.views.user_details'),
+    url(r'^user/(\w+)/$', cuv.user_details,
+        name='chezbob.users.views.user_details'),
     url(r'^username/(\w+)/$', cuv.user_details_byname),
 
     # Cashout
@@ -61,6 +65,8 @@ urlpatterns = [
 
     url(r'^accounts/login/$', login, name='django.login'),
 
-    # Uncomment when running on local testing server, set correct path for js files
-    # (r'^js/(?P<path>.*)$', 'django.views.static.serve', {'document_root': '/home/nbales/Sources/chezbob.hg/www/js/'}),
+    # Uncomment when running on testing server, set correct path for js files
+    # (r'^js/(?P<path>.*)$',
+    #  'django.views.static.serve',
+    #  {'document_root': '/home/nbales/Sources/chezbob.hg/www/js/'}),
 ]

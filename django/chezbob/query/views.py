@@ -1,15 +1,15 @@
-import base64, cgi, datetime, math
-from decimal import Decimal
-from time import strptime
+import cgi
+import datetime
 
-from django.shortcuts import render_to_response, get_object_or_404
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render_to_response
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 
-##### Available queries to run #####
+# Available queries to run #
 queries = {}
 query_order = []
+
+
 def add_query(name, description, query, variables):
     queries[name] = {"name": name,
                      "description": description,
@@ -19,6 +19,7 @@ def add_query(name, description, query, variables):
                      "param_info": [{'name': x[0], 'default': x[1]}
                                     for x in variables]}
     query_order.append(name)
+
 
 add_query("accounts", "Account Balances",
           """select username, balance, last_deposit_time::date,
@@ -112,7 +113,8 @@ add_query("transactions", "User Transaction Log",
              order by xacttime""",
           [('username', '')])
 
-##### Helper functions #####
+
+# Helper functions #
 def run_query(query, variables):
     """Run an SQL query directly against the database and return results.
 
@@ -127,6 +129,7 @@ def run_query(query, variables):
     data = cursor.fetchall()
 
     return {'query': query, 'columns': columns, 'data': data}
+
 
 # Execute a query and return the results as an HTML table.
 def generate_table(query_name, request):
@@ -157,7 +160,8 @@ def generate_table(query_name, request):
 
     yield "</table>\n"
 
-##### Page view functions (invoked by Django to display a page) #####
+
+# Page view functions (invoked by Django to display a page) #
 @login_required
 def home(request):
     all_queries = [queries[n] for n in query_order]
@@ -165,11 +169,13 @@ def home(request):
     return render_to_response('query/home.html',
                               {'user': request.user, 'queries': all_queries})
 
+
 def results(request, query):
     table = "".join(generate_table(query, request))
 
     return render_to_response('query/results.html',
                               {'user': request.user, 'raw_table': table})
+
 
 @login_required
 def raw_table(request, query):

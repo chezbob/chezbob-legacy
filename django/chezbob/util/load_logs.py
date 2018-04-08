@@ -7,9 +7,12 @@ Bob finance system.
 
 from __future__ import print_function
 
-import datetime, time, re, sys
+import datetime
+import time
+import re
 
 from chezbob.finance.models import Account, Split, Transaction
+
 
 # Transaction log parsers
 class GenericTransactionParser:
@@ -34,7 +37,8 @@ class GenericTransactionParser:
             return self.saved_lines.pop()
         else:
             line = self.fp.readline()
-            if line == "": line = None
+            if line == "":
+                line = None
             return line
 
     def push_line(self, line):
@@ -51,7 +55,8 @@ class GenericTransactionParser:
         in_quote = False
         result = ""
         for p in re.split('(")', line):
-            if p == '"': in_quote = not in_quote
+            if p == '"':
+                in_quote = not in_quote
             if in_quote:
                 p = re.sub(r',', r'\\054', p)
             result += p
@@ -72,7 +77,8 @@ class GenericTransactionParser:
             i = i.strip()
             if len(i) > 0 and i[0] == '"':
                 i = re.sub(r'"', "", i)
-                i = re.sub(r"\\(\d{1,3})", lambda m: chr(int(m.group(1), 8)), i)
+                i = re.sub(
+                    r"\\(\d{1,3})", lambda m: chr(int(m.group(1), 8)), i)
             return i
 
         row = [decode_item(i) for i in re.split(r", *", self.csv_escape(line))]
@@ -99,7 +105,8 @@ class GenericTransactionParser:
         """Return the next row of data but do not remove from the input."""
 
         line = self.next_line()
-        if line is None: return None
+        if line is None:
+            return None
 
         # On error parsing this line, try to peek again; since we haven't
         # pushed the current line back onto the input queue yet, this
@@ -112,6 +119,7 @@ class GenericTransactionParser:
 
         self.push_line(line)
         return row
+
 
 class TransactionParser(GenericTransactionParser):
     """Specialized parser for ChezBob database dumps."""
@@ -126,6 +134,7 @@ class TransactionParser(GenericTransactionParser):
     def preprocess_date(self, datestr):
         return datestr.split()[0]
 
+
 # Keep this synchronized with any changes to the account list in the database.
 acct_deposits = Account.objects.get(id=2)
 acct_cash = Account.objects.get(id=7)
@@ -136,7 +145,9 @@ acct_bank = Account.objects.get(id=1)
 acct_social_restricted = Account.objects.get(id=21)
 acct_social_donations = Account.objects.get(id=20)
 
-def update_ledger(date, deposits, purchases, donations, writeoffs, social_hour):
+
+def update_ledger(
+        date, deposits, purchases, donations, writeoffs, social_hour):
     for t in list(Transaction.objects.filter(date=date, auto_generated=True)):
         t.split_set.all().delete()
         t.delete()
@@ -150,7 +161,8 @@ def update_ledger(date, deposits, purchases, donations, writeoffs, social_hour):
         s.save()
 
     if purchases:
-        t = Transaction(date=date, description="Purchases", auto_generated=True)
+        t = Transaction(
+            date=date, description="Purchases", auto_generated=True)
         t.save()
         s = Split(transaction=t, account=acct_purchases, amount=-purchases)
         s.save()
@@ -158,7 +170,8 @@ def update_ledger(date, deposits, purchases, donations, writeoffs, social_hour):
         s.save()
 
     if donations:
-        t = Transaction(date=date, description="Donations", auto_generated=True)
+        t = Transaction(
+            date=date, description="Donations", auto_generated=True)
         t.save()
         s = Split(transaction=t, account=acct_donations, amount=-donations)
         s.save()
@@ -166,7 +179,8 @@ def update_ledger(date, deposits, purchases, donations, writeoffs, social_hour):
         s.save()
 
     if writeoffs:
-        t = Transaction(date=date, description="Debt Written Off", auto_generated=True)
+        t = Transaction(
+            date=date, description="Debt Written Off", auto_generated=True)
         t.save()
         s = Split(transaction=t, account=acct_writeoff, amount=writeoffs)
         s.save()
@@ -174,7 +188,8 @@ def update_ledger(date, deposits, purchases, donations, writeoffs, social_hour):
         s.save()
 
     if social_hour:
-        t = Transaction(date=date, description="Social Hour Donations", auto_generated=True)
+        t = Transaction(date=date, description="Social Hour Donations",
+                        auto_generated=True)
         t.save()
         s = Split(transaction=t, account=acct_social_donations,
                   amount=-social_hour)
@@ -188,6 +203,7 @@ def update_ledger(date, deposits, purchases, donations, writeoffs, social_hour):
         s = Split(transaction=t, account=acct_social_restricted,
                   amount=social_hour)
         s.save()
+
 
 def process_log(fp):
     p = TransactionParser(fp)
@@ -203,11 +219,13 @@ def process_log(fp):
 
         if next_date != old_date:
             if old_date is not None:
-                print(old_date, deposits, purchases,
-                      donations, writeoffs, social_hour)
-                update_ledger(old_date, deposits / 100.0, purchases / 100.0,
-                              donations / 100.0, writeoffs / 100.0,
-                              social_hour / 100.0)
+                print(old_date)
+                raise Exception("Don't know how to correct old date found.")
+                #, deposits, purchases,
+                #donations, writeoffs, social_hour)
+                #update_ledger(old_date, deposits / 100.0, purchases / 100.0,
+                #              donations / 100.0, writeoffs / 100.0,
+                #              social_hour / 100.0)
             deposits = 0
             purchases = 0
             donations = 0

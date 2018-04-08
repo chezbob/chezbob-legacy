@@ -1,13 +1,9 @@
-import datetime
 from decimal import Decimal, InvalidOperation
 import time
-#from time import strptime
 from django.shortcuts import render_to_response, get_object_or_404
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.conf.urls import *
-from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib.auth.decorators import user_passes_test
+from django.http import HttpResponseRedirect
 from chezbob.cashout.models import CashOut, Entity, CashCount
 
 import chezbob.finance.models as finance
@@ -16,30 +12,36 @@ from django.core.paginator import Paginator, InvalidPage, EmptyPage
 import re
 
 view_perm_required = \
-        user_passes_test(lambda u: u.has_perm('cashout.view_cashouts'))
+    user_passes_test(lambda u: u.has_perm('cashout.view_cashouts'))
 edit_perm_required = \
-        user_passes_test(lambda u: u.has_perm('cashout.change_cashout'))
+    user_passes_test(lambda u: u.has_perm('cashout.change_cashout'))
 
 time_format = "%Y-%m-%d %H:%M"
 time_format2 = "%Y-%m-%d %H:%M:%S"
 
 count_per_page = 25
 
+
 def parse_datetime(datetimestr):
     try:
-        return time.strftime(time_format,(time.strptime(datetimestr, time_format)))
+        return time.strftime(time_format,
+                             (time.strptime(datetimestr, time_format)))
     except ValueError:
         pass
 
-    return time.strftime(time_format2,(time.strptime(datetimestr, time_format2)))
+    return time.strftime(time_format2,
+                         (time.strptime(datetimestr, time_format2)))
+
 
 def datetimetodate(datetimestr):
     try:
-        return time.strftime("%Y-%m-%d",(time.strptime(datetimestr, time_format)))
+        return time.strftime("%Y-%m-%d",
+                             (time.strptime(datetimestr, time_format)))
     except ValueError:
         pass
 
-    return time.strftime("%Y-%m-%d",(time.strptime(datetimestr, time_format2)))
+    return time.strftime("%Y-%m-%d",
+                         (time.strptime(datetimestr, time_format2)))
 
 
 @view_perm_required
@@ -53,7 +55,7 @@ def ledger(request):
     default_pagenum = paginator.num_pages
     try:
         pagenum = int(request.GET.get('page', default_pagenum))
-    except:
+    except ValueError:
         pagenum = default_pagenum
 
     try:
@@ -62,7 +64,7 @@ def ledger(request):
         page = paginator.page(paginator.num_pages)
 
     # Slice
-    page_cashouts = all_cashouts[page.object_list[0]:page.object_list[-1]+1]
+    page_cashouts = all_cashouts[page.object_list[0]:page.object_list[-1] + 1]
 
     cashouts = []
     balance = CashOut.balance_before(page_cashouts[0])
@@ -84,17 +86,14 @@ def ledger(request):
         cashouts.append({
             'info': c,
             'counts': cashcount_list,
-            'total':total,
-            'balance':balance
-            })
-
-
+            'total': total,
+            'balance': balance})
 
     return render_to_response('cashout/cashouts.html',
                               {'title': title,
                                'cashouts': cashouts,
-                               'page': page
-                               })
+                               'page': page})
+
 
 @view_perm_required
 def cashonhand(request):
@@ -107,7 +106,7 @@ def cashonhand(request):
     default_pagenum = paginator.num_pages
     try:
         pagenum = int(request.GET.get('page', default_pagenum))
-    except:
+    except ValueError:
         pagenum = default_pagenum
 
     try:
@@ -116,7 +115,7 @@ def cashonhand(request):
         page = paginator.page(paginator.num_pages)
 
     # Slice
-    page_cashouts = all_cashouts[page.object_list[0]:page.object_list[-1]+1]
+    page_cashouts = all_cashouts[page.object_list[0]:page.object_list[-1] + 1]
 
     fields = CashCount.fields
     field_names = CashCount.field_names
@@ -130,7 +129,7 @@ def cashonhand(request):
     m = re.compile(r'^(?:bill|coin)')
 
     for c in page_cashouts:
-        cashcount_list = [];
+        cashcount_list = []
 
         for s in CashCount.objects.filter(cashout=c):
             cashcount = []
@@ -138,24 +137,23 @@ def cashonhand(request):
                 try:
                     onhand_total[f] += s.__dict__[f]
                 except TypeError:
-                    pass # Probably 0 anyway.
+                    pass  # Probably 0 anyway.
 
                 if m.search(f):
                     cashcount.append("%d" % (s.__dict__[f]))
                 else:
                     cashcount.append("%.2f" % (s.__dict__[f]))
 
-            cashcount_list.append({'count':cashcount,
-                                   'entity':s.entity})
+            cashcount_list.append({'count': cashcount,
+                                   'entity': s.entity})
 
         total = []
         for f in fields:
             total.append(onhand_total[f])
 
-        cashouts.append({
-                         'info': c,
+        cashouts.append({'info': c,
                          'counts': cashcount_list,
-                         'total':total,
+                         'total': total,
                          })
 
     return render_to_response('cashout/cashonhand.html',
@@ -166,12 +164,14 @@ def cashonhand(request):
                                'page': page
                                })
 
+
 @edit_perm_required
 def edit_cashout(request, cashout=None):
     load_from_database = True
 
-    if cashout == None:
-        cashout = CashOut(datetime=time.strftime(time_format,time.localtime()))
+    if cashout is None:
+        cashout = CashOut(datetime=time.strftime(
+            time_format, time.localtime()))
         load_from_database = False
     else:
         cashout = get_object_or_404(CashOut, id=int(cashout))
@@ -204,7 +204,8 @@ def edit_cashout(request, cashout=None):
                         values[f] = int(request.POST[f + '.' + n])
                     else:
                         values[f] = Decimal(request.POST[f + '.' + n])
-                except (ValueError, InvalidOperation): values[f] = 0
+                except (ValueError, InvalidOperation):
+                    values[f] = 0
 
             total = 0
 
@@ -222,10 +223,10 @@ def edit_cashout(request, cashout=None):
                 count_count = []
 
                 count = {
-                         'memo' : memo,
-                         'entity' : entity,
-                         'total' : total
-                         }
+                    'memo': memo,
+                    'entity': entity,
+                    'total': total
+                }
 
                 for f in fields[:-1]:
                     count[f] = values[f]
@@ -245,10 +246,10 @@ def edit_cashout(request, cashout=None):
     if load_from_database:
         for c in cashout.cashcount_set.all().order_by('entity'):
             count = {
-                   'id':c.id,
-                   'memo':c.memo,
-                   'entity':c.entity
-                   }
+                'id': c.id,
+                'memo': c.memo,
+                'entity': c.entity
+            }
             count_count = []
             for f in fields:
                 count[f] = c.__dict__[f]
@@ -263,8 +264,7 @@ def edit_cashout(request, cashout=None):
         cashout.save()
         CashCount.objects.filter(cashout=cashout).delete()
         for c in counts:
-            count = CashCount(
-                              cashout=cashout,
+            count = CashCount(cashout=cashout,
                               entity=c['entity'],
                               memo=c['memo'],
                               bill100=c['bill100'],
@@ -304,15 +304,16 @@ def edit_cashout(request, cashout=None):
     return render_to_response(
         'cashout/cashout_update.html',
         {
-           'user': request.user,
-           'entitys': entitys,
-           'cashout': cashout,
-           'cashcounts': counts,
-           'fields': CashCount.fields,
-           'field_names': CashCount.field_names,
-           'field_index': list(range(0, len(CashCount.fields[:-1])))
+            'user': request.user,
+            'entitys': entitys,
+            'cashout': cashout,
+            'cashcounts': counts,
+            'fields': CashCount.fields,
+            'field_names': CashCount.field_names,
+            'field_index': list(range(0, len(CashCount.fields[:-1])))
         }
     )
+
 
 @edit_perm_required
 def gen_transaction(request, cashout):
@@ -339,54 +340,54 @@ def gen_transaction(request, cashout):
         if c.entity.name in ("Soda Machine", "Cash Box"):
             transaction.description = "Cash Collected"
             split['account'] = finance.Account.objects.get(
-                                        id=int(account_name['cash'])
-                                                          )
+                id=int(account_name['cash']))
 
             split['memo'] = c.entity.name
 
         elif c.entity.name in ("To Bank"):
             split['account'] = finance.Account.objects.get(
-                                        id=int(account_name['bank'])
-                                                          )
+                id=int(account_name['bank']))
             split['memo'] = ""
             transaction.description = "Cash Deposit"
 
         elif c.entity.name in ("Payment"):
             transaction.description = cashout.notes
             split['account'] = finance.Account.objects.get(
-                                        id=int(account_name['inventory'])
-                                                          )
+                id=int(account_name['inventory']))
             split['memo'] = ""
 
-
-        if total < 0: split['debit'] = -total
-        if total > 0: split['credit'] = total
+        if total < 0:
+            split['debit'] = -total
+        if total > 0:
+            split['credit'] = total
 
         splits.append(split)
 
     s = {
-          'account':
-                finance.Account.objects.get(id=int(account_name['collected'])),
-           'amount':balance
-        }
-    if balance > 0: s['debit'] = balance
-    if balance < 0: s['credit'] = -balance
+        'account':
+            finance.Account.objects.get(id=int(account_name['collected'])),
+        'amount': balance
+    }
+    if balance > 0:
+        s['debit'] = balance
+    if balance < 0:
+        s['credit'] = -balance
 
     splits.append(s)
 
+    return render_to_response(
+        'finance/transaction_update.html',
+        {
+            'user': request.user,
+            'accounts': finance.Account.objects.order_by('name'),
+            'transaction': transaction,
+            'splits': splits,
+            'action': '/admin/finance/transaction/new/'
+        })
 
-    return render_to_response('finance/transaction_update.html',
-                              {
-                          'user': request.user,
-                          'accounts': finance.Account.objects.order_by('name'),
-                          'transaction': transaction,
-                          'splits': splits,
-                          'action':'/admin/finance/transaction/new/'
-                               })
 
 @view_perm_required
 def show_losses(request):
-    title = 'Cash Losses'
     transcript = ""
     summary = []
 
@@ -396,7 +397,8 @@ def show_losses(request):
     def add_amt(dict, key, value):
         # Add the given value into a dictionary, adding it to any existing
         # value.
-        if key not in dict: dict[key] = Decimal("0.00")
+        if key not in dict:
+            dict[key] = Decimal("0.00")
         dict[key] += value
 
     def show_dict(dict):
@@ -409,7 +411,7 @@ def show_losses(request):
 
     # FIXME: These ought to not be hard-coded
     acct_cash = finance.Account.objects.get(id=7)
-    acct_adjustments = finance.Account.objects.get(id=23)
+    #acct_adjustments = finance.Account.objects.get(id=23)
     cashout_entity_soda = Entity.objects.get(id=1)
     cashout_entity_box = Entity.objects.get(id=2)
 
@@ -428,7 +430,8 @@ def show_losses(request):
     transcript += "Starting cash: %s on %s\n\n" % (balance, last_date)
 
     source_totals = {}
-    for cashout in CashOut.objects.filter(datetime__gte=last_date).order_by('datetime'):
+    for cashout in CashOut.objects.filter(
+            datetime__gte=last_date).order_by('datetime'):
         transcript += str(cashout) + "\n"
         cursor.execute("""SELECT source, sum(xactvalue)
                           FROM transactions
@@ -460,10 +463,12 @@ def show_losses(request):
         cashcount = False
         collected = {}
         for c in cashout.cashcount_set.all():
-            if c.entity in (cashout_entity_soda, cashout_entity_box) \
-                and c.total > 0:
+            if (
+                    c.entity in (cashout_entity_soda, cashout_entity_box) and
+                    c.total > 0):
                 add_amt(collected, c.entity.name, c.total)
-                transcript += "  Cash Count: %s (%s)\n" % (c.total, c.entity.name)
+                transcript += "  Cash Count: %s (%s)\n" % (
+                    c.total, c.entity.name)
                 cashcount = True
                 if c.entity == cashout_entity_soda:
                     cash_deltas['soda'] += c.total

@@ -1,12 +1,13 @@
 """Code for repricing items sold at Chez Bob."""
 
-import cgi, datetime, time, re, sys
+import cgi
+import datetime
 from decimal import Decimal
 
-from chezbob.bobdb.models import BulkItem, Product, ProductSource, HistoricalPrice
+from chezbob.bobdb.models import BulkItem, HistoricalPrice
 from django.db import connection
-import django.db.transaction
 cursor = connection.cursor()
+
 
 def to_decimal(f):
     """Convert a floating-point value to a decimal.
@@ -15,6 +16,7 @@ def to_decimal(f):
     currency value."""
 
     return Decimal(str(f)).quantize(Decimal("0.00"))
+
 
 def update_price_listing(out, update=True):
     today = datetime.date.today()
@@ -60,11 +62,12 @@ def update_price_listing(out, update=True):
                     change = "%.01f%%" % (change,)
                 else:
                     change = ""
-                old_price = "$%.02f before %s" % (old_price.price, changed_date)
+                old_price = "$%.02f before %s" % (
+                    old_price.price, changed_date)
             else:
                 old_price = ""
                 change = ""
-        except:
+        except:  # noqa
             old_price = ""
             change = ""
 

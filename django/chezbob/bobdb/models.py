@@ -7,21 +7,25 @@ from django.db import models, connection, transaction
 # instead.
 TAX_RATE = Decimal("0.0775")
 
+
 class CharNullField(models.CharField):
     """Courtesy of https://code.djangoproject.com/ticket/9590."""
     description = "CharField that stores NULL but returns ''"
+
     def to_python(self, value):
         if isinstance(value, models.CharField):
-            return value 
-        if value==None:
+            return value
+        if value is None:
             return ""
         else:
             return value
+
     def get_db_prep_value(self, value, connection, prepared=False):
-        if value=="":
+        if value == "":
             return None
         else:
             return value
+
 
 class ProductSource(models.Model):
     class Meta:
@@ -33,6 +37,7 @@ class ProductSource(models.Model):
 
     def __str__(self):
         return self.description
+
 
 class FloorLocations(models.Model):
     class Meta:
@@ -74,8 +79,10 @@ class BulkItem(models.Model):
                                        verbose_name="CRV per-unit")
     crv_taxable = models.BooleanField()
     quantity = models.IntegerField()
-    updated = models.DateField() #For Django 1.2+, add auto_now=True to 
-                                 #automatically update field when record updated
+
+    # For Django 1.2+, add auto_now=True to automatically update field when
+    # record updated
+    updated = models.DateField()
     source = models.ForeignKey(ProductSource, db_column='source')
     reserve = models.IntegerField()
     active = models.BooleanField(default=True)
@@ -93,15 +100,20 @@ class BulkItem(models.Model):
     def cost_taxable(self):
         """Portion of total price which is taxed."""
         amt = Decimal("0.00")
-        if self.taxable: amt += self.price
-        if self.crv_taxable: amt += self.quantity * self.crv_per_unit
+        if self.taxable:
+            amt += self.price
+        if self.crv_taxable:
+            amt += self.quantity * self.crv_per_unit
         return amt
 
     def cost_nontaxable(self):
         """Portion of total price which is not taxed."""
+
         amt = Decimal("0.00")
-        if not self.taxable: amt += self.price
-        if not self.crv_taxable: amt += self.quantity * self.crv_per_unit
+        if not self.taxable:
+            amt += self.price
+        if not self.crv_taxable:
+            amt += self.quantity * self.crv_per_unit
         return amt
 
     def total_price(self):
@@ -113,6 +125,7 @@ class BulkItem(models.Model):
         """Total price (including all taxes) for each individual item."""
         return (self.total_price() / self.quantity).quantize(Decimal("0.0001"))
 
+
 class Product(models.Model):
     class Meta:
         db_table = 'products'
@@ -121,7 +134,8 @@ class Product(models.Model):
     name = models.CharField(max_length=256)
     phonetic_name = models.CharField(max_length=256)
     price = models.DecimalField(max_digits=12, decimal_places=2)
-    bulk = models.ForeignKey(BulkItem, db_column='bulkid', null=True, blank=True)
+    bulk = models.ForeignKey(
+        BulkItem, db_column='bulkid', null=True, blank=True)
 
     def __str__(self):
         return "%s [%s]" % (self.name, self.barcode)
@@ -138,6 +152,7 @@ class Product(models.Model):
                        [self.barcode])
         return cursor.fetchall()
 
+
 class DynamicProduct(models.Model):
     """This is a view, and needs a userid specified to be tractable."""
     class Meta:
@@ -147,11 +162,13 @@ class DynamicProduct(models.Model):
     name = models.CharField(max_length=256)
     phonetic_name = models.CharField(max_length=256)
     price = models.DecimalField(max_digits=12, decimal_places=2)
-    bulk = models.ForeignKey(BulkItem, db_column='bulkid', null=True, blank=True)
+    bulk = models.ForeignKey(
+        BulkItem, db_column='bulkid', null=True, blank=True)
     userid = models.IntegerField(null=False, blank=False)
 
     def __str__(self):
         return "%s [%s]" % (self.name, self.barcode)
+
 
 class HistoricalPrice(models.Model):
     class Meta:
@@ -198,13 +215,14 @@ class HistoricalPrice(models.Model):
 #    # Cost for each unit ordered.  To get the total cost, multiply by number.
 #    # The cost is split into taxable and non-taxable components; we do this
 #    # instead of using a "taxable" boolean since both could be present (for
-#    # example, item is not taxable but the CRV on the item is).  In most cases,
-#    # one of the costs will be zero.
+#    # example, item is not taxable but the CRV on the item is).  In most
+#    # cases, one of the costs will be zero.
 #    cost_taxable = models.DecimalField(max_digits=12, decimal_places=2)
 #    cost_nontaxable = models.DecimalField(max_digits=12, decimal_places=2)
 #
 #    def __str__(self):
 #        return "%d %s" % (self.number, self.bulk_type)
+
 
 # This class doesn't actually connect directly with the underlying database
 # table, but the class methods provided do perform useful queries.
@@ -294,9 +312,9 @@ class Inventory(models.Model):
         if not include_latest:
             inventory_date -= datetime.timedelta(days=1)
 
-##
-## Use this version of the query once postgre 8.4+ is installed
-##
+#
+# TODO - Use this version of the query once postgre 8.4+ is installed
+#
 
 #        sql = """
 #with start_dates as
@@ -325,35 +343,36 @@ class Inventory(models.Model):
 #
 #        args = (inventory_date, date, date)
 
-##
-## This version compatable with postgre <8.4
-##
+#
+# This version compatable with postgre <8.4
+#
         sql = """
-select * 
+select *
 from (select bulkid, date, units
-      from (select bulkid, max(date::date) as date 
+      from (select bulkid, max(date::date) as date
             from inventory
-            where date::date <= %s 
-            group by bulkid) s1a 
+            where date::date <= %s
+            group by bulkid) s1a
       natural join inventory) s1
-natural full outer join 
+natural full outer join
     (select a.bulkid, sum(quantity) as sales
-     from aggregate_purchases a 
-     left join 
-         (select bulkid, max(date::date) as date 
+     from aggregate_purchases a
+     left join
+         (select bulkid, max(date::date) as date
           from inventory
-          where date::date <= %s 
+          where date::date <= %s
           group by bulkid) s2a using (bulkid)
      where coalesce(a.date::date > s2a.date, true) and a.date::date <= %s
      group by bulkid) s2
 natural full outer join
-    (select oi.bulk_type_id as bulkid, sum(oi.quantity * oi.number) as purchases
+    (select oi.bulk_type_id as bulkid,
+     sum(oi.quantity * oi.number) as purchases
      from orders o
      join order_items oi on o.id = oi.order_id
-     left join 
-         (select bulkid, max(date::date) as date 
+     left join
+         (select bulkid, max(date::date) as date
           from inventory
-          where date::date <= %s 
+          where date::date <= %s
           group by bulkid) s3a on s3a.bulkid = oi.bulk_type_id
      where coalesce(o.date::date > s3a.date, true) and o.date::date <= %s
      group by oi.bulk_type_id) s3
@@ -361,9 +380,9 @@ where bulkid is not null
 """
         args = (inventory_date, inventory_date, date, inventory_date, date)
 
-##
-## End postgre <8.4 code
-##
+#
+# End postgre <8.4 code
+#
 
         cursor = connection.cursor()
 
@@ -371,17 +390,19 @@ where bulkid is not null
 
         summary = {}
         for (bulkid, date, units, sales, purchases) in cursor.fetchall():
-            if sales is None: sales = 0
-            if purchases is None: purchases = 0
-            if units is None: units = 0
+            if sales is None:
+                sales = 0
+            if purchases is None:
+                purchases = 0
+            if units is None:
+                units = 0
 
             summary[bulkid] = {'estimate': units + purchases - sales,
-                                 'date': date,
-                                 'old_count': units,
-                                 'activity': sales > 0 or purchases > 0,
-                                 'sales': sales,
-                                 'purchases': purchases
-                               }
+                               'date': date,
+                               'old_count': units,
+                               'activity': sales > 0 or purchases > 0,
+                               'sales': sales,
+                               'purchases': purchases}
 
         return summary
 

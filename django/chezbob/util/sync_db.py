@@ -6,11 +6,12 @@ insert daily aggregate amounts into the main finance ledger.
 
 from __future__ import print_function
 
-import datetime, time, re, sys
+import datetime
+
 from decimal import Decimal
 
 from chezbob.finance.models import Account, Split, Transaction, DepositBalances
-from chezbob.cashout.models import Entity, CashOut, CashCount
+from chezbob.cashout.models import Entity, CashOut
 
 dry_run = False
 
@@ -32,16 +33,22 @@ cashout_entity_box = Entity.objects.get(id=2)
 # description, followed by a list of splits to include, as (multiplier,
 # account) pairs.
 auto_transactions = {
-    'deposit':    ["Deposits", (+1, acct_cash), (-1, acct_deposits)],
-    'donate':     ["Donations", (+1, acct_deposits), (-1, acct_donations)],
-    'purchase':   ["Purchases", (+1, acct_deposits), (-1, acct_purchases)],
-    'socialhour': ["Social Hour Donations",
-                   (+1, acct_deposits), (-1, acct_social_donations),
-                   (+1, acct_social_restricted), (-1, acct_bank)],
-    'writeoff':   ["Debt Written Off",
-                   (+1, acct_writeoff), (-1, acct_deposits)],
-    'refund':     ["Refunds", (+1, acct_deposits), (-1, acct_cash)],
+    'deposit': [
+        "Deposits", (+1, acct_cash), (-1, acct_deposits)],
+    'donate': [
+        "Donations", (+1, acct_deposits), (-1, acct_donations)],
+    'purchase': [
+        "Purchases", (+1, acct_deposits), (-1, acct_purchases)],
+    'socialhour': [
+        "Social Hour Donations",
+        (+1, acct_deposits), (-1, acct_social_donations),
+        (+1, acct_social_restricted), (-1, acct_bank)],
+    'writeoff': [
+        "Debt Written Off", (+1, acct_writeoff), (-1, acct_deposits)],
+    'refund': [
+        "Refunds", (+1, acct_deposits), (-1, acct_cash)],
 }
+
 
 def insert_transaction(date, type, amount):
     info = auto_transactions[type]
@@ -58,8 +65,10 @@ def insert_transaction(date, type, amount):
         s = Split(transaction=t, account=i[1], amount=amt)
         s.save()
 
+
 # A running total of Bank of Bob liabilities (in dollars)
 bob_liabilities = Decimal("0.00")
+
 
 def update_day(date, amounts):
     old_transactions = list(Transaction.objects.filter(date=date,
@@ -156,6 +165,7 @@ def update_day(date, amounts):
     if old_transactions:
         print("Unmatched transactions:", old_transactions)
 
+
 def sync_day(date):
     global bob_liabilities
 
@@ -166,8 +176,8 @@ def sync_day(date):
     cursor.execute("""SELECT xactvalue, xacttype FROM transactions
                       WHERE xacttime::date = %s""", (date,))
 
-    (sum_deposit, sum_donate, sum_purchase, sum_socialhour, sum_writeoff, sum_refund) \
-        = tuple([Decimal("0.00")] * 6)
+    (sum_deposit, sum_donate, sum_purchase,
+     sum_socialhour, sum_writeoff, sum_refund) = tuple([Decimal("0.00")] * 6)
 
     for (amt, desc) in cursor.fetchall():
         bob_liabilities += amt
@@ -186,7 +196,7 @@ def sync_day(date):
             sum_writeoff += amt
         elif category == "REFUND":
             sum_refund -= amt
-        elif category == "WITHDRAW":  # Not sure this is the right response here...
+        elif category == "WITHDRAW":  # Is the right response here?
             sum_deposit -= amt
         else:
             raise ValueError("Unknown transaction: " + desc)
@@ -197,6 +207,7 @@ def sync_day(date):
                       'socialhour': sum_socialhour,
                       'writeoff': sum_writeoff,
                       'refund': sum_refund})
+
 
 def sync():
     global bob_liabilities
@@ -213,6 +224,7 @@ def sync():
     while date <= end_date:
         sync_day(date)
         date += datetime.timedelta(days=1)
+
 
 def check_cash():
     from django.db import connection

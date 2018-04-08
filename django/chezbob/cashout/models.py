@@ -1,6 +1,7 @@
 from decimal import Decimal
-from django.db import models, connection
+from django.db import models
 from django.utils.safestring import mark_safe
+
 
 class Entity(models.Model):
     class Meta:
@@ -36,16 +37,18 @@ class CashOut(models.Model):
 
     @classmethod
     def balance_before(cls, cashout):
-        res = CashCount.objects.filter(cashout__datetime__lt=cashout.datetime).aggregate(total_sum=models.Sum('total'))
+        res = CashCount.objects.filter(
+            cashout__datetime__lt=cashout.datetime).aggregate(
+                total_sum=models.Sum('total'))
 
         try:
             return res['total_sum']
-        except:
+        except:  # noqa
             return 0
 
     def delete(self):
         CashCount.objects.filter(cashout=self).delete()
-        super(CashOut, self).delete() # Call the real save func
+        super(CashOut, self).delete()  # Call the real save func
 
 
 class CashCount(models.Model):
@@ -62,7 +65,7 @@ class CashCount(models.Model):
     bill10  = models.IntegerField('$10')
     bill5   = models.IntegerField('$5')
     bill1   = models.IntegerField('$1')
-    coin100 = models.IntegerField('&cent;100') # \xa2 is cent symbol
+    coin100 = models.IntegerField('&cent;100')  # \xa2 is cent symbol
     coin50  = models.IntegerField('&cent;50')
     coin25  = models.IntegerField('&cent;25')
     coin10  = models.IntegerField('&cent;10')
@@ -124,7 +127,6 @@ class CashCount(models.Model):
         'total': 1
     }
 
-
     def save(self):
         total = 0
 
@@ -133,7 +135,7 @@ class CashCount(models.Model):
 
         self.total = total
 
-        super(CashCount, self).save() # Call the real save func
+        super(CashCount, self).save()  # Call the real save func
 
     @classmethod
     def totals_before(cls, cashout):
@@ -142,9 +144,10 @@ class CashCount(models.Model):
         for f in CashCount.fields:
             totals_dict[f] = models.Sum(f)
 
-        res = CashCount.objects.filter(cashout__datetime__lt=cashout.datetime).aggregate(**totals_dict)
+        res = CashCount.objects.filter(
+            cashout__datetime__lt=cashout.datetime).aggregate(**totals_dict)
 
         try:
             return res
-        except:
+        except:  # noqa
             return {}

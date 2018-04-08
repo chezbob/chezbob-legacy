@@ -1,8 +1,10 @@
 from chezbob.bobdb.models import BulkItem, Product
 from django.contrib import admin
 
+
 class ProductInline(admin.TabularInline):
     model = Product
+
 
 class BulkItemAdmin(admin.ModelAdmin):
     search_fields = ['description', 'product_id']
@@ -16,15 +18,18 @@ class BulkItemAdmin(admin.ModelAdmin):
     ordering = ['description']
     list_filter = ['updated', 'active', 'source', 'floor_location']
     list_display = ['description', 'product_id', 'quantity', 'price',
-                    'taxable', 'crv_per_unit', 'crv_taxable', 'updated', 'active',
-                    'source', 'floor_location', 'bulkbarcode']
+                    'taxable', 'crv_per_unit', 'crv_taxable', 'updated',
+                    'active', 'source', 'floor_location', 'bulkbarcode']
     inlines = [ProductInline]
-admin.site.register(BulkItem, BulkItemAdmin)
+
 
 class ProductAdmin(admin.ModelAdmin):
     ordering = ['name']
     search_fields = ['barcode', 'name']
     list_display = ['barcode', 'name', 'price']
+
+
+admin.site.register(BulkItem, BulkItemAdmin)
 admin.site.register(Product, ProductAdmin)
 
 #class OrderAdmin(admin.ModelAdmin):

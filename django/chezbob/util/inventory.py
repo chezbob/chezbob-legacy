@@ -7,7 +7,8 @@ goods sold, profits, and shrinkage.
 
 from __future__ import print_function
 
-import datetime, time, re, sys
+import datetime
+import sys
 from decimal import Decimal
 
 from chezbob.bobdb.models import BulkItem, Inventory
@@ -17,15 +18,19 @@ cursor = connection.cursor()
 
 ONE_DAY = datetime.timedelta(days=1)
 
+
 def extract(seq, date):
     while seq != []:
-        if seq[0][0] > date: return
+        if seq[0][0] > date:
+            return
         yield seq.pop(0)
+
 
 def check_item(inv, bulkid, price_estimates):
     if bulkid not in inv:
         price = price_estimates.get(bulkid, Decimal(0.0))
         inv[bulkid] = {'count': 0, 'cost': Decimal(0.0), 'price': price}
+
 
 def to_decimal(f):
     """Convert a floating-point value to a decimal.
@@ -35,8 +40,10 @@ def to_decimal(f):
 
     return Decimal(str(f)).quantize(Decimal("0.00"))
 
+
 def item_name(bulkid):
     return BulkItem.objects.get(bulkid=bulkid).description
+
 
 def generate_inventory_report(start, end=None):
     """Generate a report of changes to inventory, including sales and shrinkage.
@@ -127,7 +134,8 @@ def generate_inventory_report(start, end=None):
 
         for p in extract(purchases, date):
             (_, bulkid, count, cost) = p
-            if bulkid is None: continue
+            if bulkid is None:
+                continue
             cost = Decimal(cost)
             check_item(inventory, bulkid, price_estimates)
             inv = inventory[bulkid]
@@ -148,7 +156,8 @@ def generate_inventory_report(start, end=None):
 
         for s in extract(sales, date):
             (_, bulkid, count, cost) = s
-            if bulkid is None: continue
+            if bulkid is None:
+                continue
             cost = Decimal(cost)
             check_item(inventory, bulkid, price_estimates)
             inv = inventory[bulkid]
@@ -171,7 +180,8 @@ def generate_inventory_report(start, end=None):
                 inv['price'] = inv['cost'] / inv['count']
             assert inv['cost'] >= 0.0
             assert inv['price'] >= 0.0
-            if inv['count'] <= 0: assert inv['cost'] == Decimal(0.0)
+            if inv['count'] <= 0:
+                assert inv['cost'] == Decimal(0.0)
 
         for i in extract(inventories, date):
             (_, bulkid, count) = i
@@ -190,6 +200,7 @@ def generate_inventory_report(start, end=None):
 
         date += ONE_DAY
 
+
 @django.db.transaction.commit_manually
 def summary(*args, **kwargs):
     try:
@@ -198,6 +209,7 @@ def summary(*args, **kwargs):
         import traceback
         traceback.print_exc()
         raise
+
 
 def bad_summary(start, end=None, commit_start=None):
     date = None
@@ -237,7 +249,8 @@ def bad_summary(start, end=None, commit_start=None):
             first_result_seen = True
 
         if inv['date'] != date:
-            if date is not None: commit_day()
+            if date is not None:
+                commit_day()
             date = inv['date']
             losses = Decimal(0.0)
 
@@ -250,6 +263,7 @@ def bad_summary(start, end=None, commit_start=None):
 
     commit_day()
     django.db.transaction.commit()
+
 
 def report_inventory(start, end=None):
     """Compute a summary of inventory values and shrinkage."""
@@ -276,13 +290,11 @@ def report_inventory(start, end=None):
     print("%s: value=%.2f, shrinkage=%.2f profit=%.2f" %
           (last_date, value, shrinkage, profit))
 
+
 def item_report(start, end=None):
     """Compute a per-item summary of shrinkage and sales."""
 
-    value = Decimal(0.0)
     shrinkage = Decimal(0.0)
-    profit = Decimal(0.0)
-    last_date = None
 
     items = {}
 
@@ -313,6 +325,7 @@ def item_report(start, end=None):
         sales += items[id]['sales']
         shrinkage += items[id]['shrinkage']
         cost += items[id]['cost']
+
 
 def category_report(start, end=None):
     """Compute a per-category summary of shrinkage and sales.

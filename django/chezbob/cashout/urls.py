@@ -1,7 +1,7 @@
 
 import chezbob.cashout.views as cbv
 
-from django.conf.urls import *
+from django.conf.urls import url
 
 urlpatterns = [
     url(r'^(\d+)/$', cbv.edit_cashout),
