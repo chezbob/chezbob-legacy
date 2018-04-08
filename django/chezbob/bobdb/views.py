@@ -17,7 +17,8 @@ def parse_date(datestr):
     future it might be extended to other formats, and auto-detect.
     """
 
-    if isinstance(datestr, datetime.date): return datestr
+    if isinstance(datestr, datetime.date):
+        return datestr
 
     try:
         return datetime.date(*strptime(datestr, "%Y-%m-%d")[0:3])
@@ -42,8 +43,8 @@ def get_session_key(request):
 
     KEY_FIELD = 'chezbob_session_key'
     if KEY_FIELD not in session:
-        random_bytes = open('/dev/urandom').read(9)
-        session[KEY_FIELD] = base64.b64encode(random_bytes)
+        random_bytes = open('/dev/urandom', 'rb').read(9)
+        session[KEY_FIELD] = base64.b64encode(random_bytes).decode('utf-8')
 
     return session[KEY_FIELD]
 
@@ -61,7 +62,7 @@ def products(request):
         except AttributeError:
             pass
 
-    if request.GET.has_key('short'):
+    if r'short' in request.GET:
         def filter(p):
             try:
                 if not p.bulk.active: return False
@@ -166,8 +167,9 @@ def update_order(request, order):
 
             # Filling in details for an entry.  If complete, save to the
             # database.
-            if request.POST.has_key('type_code.' + n):
-                if not number: continue
+            if 'type_code.' + n in request.POST:
+                if not number:
+                    continue
 
                 try:
                     bulk_code = int(request.POST['type_code.' + n])
@@ -273,19 +275,21 @@ def inventory_detail(request, bulkid):
     daily_stats = {}
     for p in products:
         for (date, sales) in p.sales_stats():
-            if not daily_stats.has_key(date): daily_stats[date] = [0, 0]
+            if date not in daily_stats:
+                daily_stats[date] = [0, 0]
             daily_stats[date][0] += sales
 
     for order in item.orderitem_set.all():
         date = order.order.date
-        if not daily_stats.has_key(date): daily_stats[date] = [0, 0]
+        if date not in daily_stats:
+            daily_stats[date] = [0, 0]
         daily_stats[date][1] += order.number * order.quantity
 
     # Produce a flattened version of the daily sales stats: convert it to a
     # list, sorted by date, of dictionaries with keys ('date', 'sales',
     # 'purchases').
     daily_stats_list = []
-    dates = daily_stats.keys()
+    dates = list(daily_stats.keys())
     dates.sort()
     for d in dates:
         stats = daily_stats[d]
@@ -337,7 +341,7 @@ def list_inventories(request):
 def take_inventory(request, date):
     date = parse_date(date)
 
-    show_all= request.GET.has_key('all')
+    show_all = 'all' in request.GET
 
     # If a POST request was submitted, apply any updates to the inventory data
     # in the database before rendering the response.
@@ -438,7 +442,7 @@ def take_inventory(request, date):
         # active is set to True if the count for this item is non-zero,
         # if the bulkidem is anntated 'active' in the database, or if
         # there have been any purchases or sales since the last inventory.
-        active = inventory['activity'] or item.active or (count > 0 and count != "")
+        active = inventory['activity'] or item.active or (count != "" and int(count) > 0)
 
         if not active and not show_all: continue #no reason to inventory item
 
@@ -475,7 +479,7 @@ def estimate_order(request):
     source = int(request.GET.get("source", 1))
     date_to = parse_date(request.GET.get("to", datetime.date.today()))
     date_from = parse_date(request.GET.get("from", date_to - datetime.timedelta(days=14)))
-    show_all= request.GET.has_key('all')
+    show_all = 'all' in request.GET
 
     #database
     products = BulkItem.objects.order_by('description')

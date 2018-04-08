@@ -26,10 +26,10 @@ class Account(models.Model):
         LIABILITY: "Liability",
     }
 
-    type = models.CharField(max_length=1, choices=TYPES.items())
+    type = models.CharField(max_length=1, choices=list(TYPES.items()))
     name = models.CharField(max_length=256)
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s [%s]" % (self.name, self.TYPES[self.type])
 
     def is_reversed(self):
@@ -78,7 +78,7 @@ class Transaction(models.Model):
     # to false will never be touched by the automated systems.
     auto_generated = models.BooleanField()
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s %s" % (self.date, self.description)
 
     @classmethod
@@ -176,7 +176,7 @@ class Split(models.Model):
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     memo = models.CharField(max_length=256, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return "%.2f %s" % (self.amount, self.account)
 
 # The "Bank of Bob Liabilities" account does not separate out positive-balance
@@ -193,7 +193,7 @@ class DepositBalances(models.Model):
     positive = models.DecimalField(max_digits=12, decimal_places=2)
     negative = models.DecimalField(max_digits=12, decimal_places=2)
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s +%.2f -%.2f" % (self.date, self.positive, self.negative)
 
 # Estimated value of Chez Bob inventory is not tracked as a core part of the
@@ -211,5 +211,5 @@ class InventorySummary(models.Model):
     value = models.DecimalField(max_digits=12, decimal_places=2)
     shrinkage = models.DecimalField(max_digits=12, decimal_places=2)
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s value=%.2f shrinkage=%.2f" % (self.date, self.value, self.shrinkage)

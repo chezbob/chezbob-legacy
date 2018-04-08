@@ -1,5 +1,5 @@
 
-from UserDict import DictMixin
+from collections import MutableMapping
 
 from django.db.models.query import QuerySet
 from django.core.serializers import json, serialize
@@ -17,7 +17,7 @@ class JsonResponse(HttpResponse):
     kwargs['content_type'] = 'application/json'
     super(JsonResponse, self).__init__(content, *args, **kwargs)
 
-class BobMessages(dict, DictMixin):
+class BobMessages(dict, MutableMapping):
   def __init__(self, *args, **kwds):
     self._errors = []
     self._warnings = []
@@ -25,23 +25,23 @@ class BobMessages(dict, DictMixin):
     self['errors']   = self._errors
     self['warnings'] = self._warnings
     self['notes'] =    self._notes
-    super(dict, self).__init__(args, kwds)
-  
+    super(dict, self).__init__(*args, **kwds)
+
   def has_errors(self):
     return len(self._errors) > 0
-    
+
   def error(self, msg):
     self._errors.append(msg)
-    
+
   def errors(self, msgs):
     self._errors.extend(msgs)
-    
+
   def warning(self, msg):
     self._warnings.append(msg)
-    
+
   def note(self, msg):
     self._notes.append(msg)
-    
+
   def extend(self, dict_extension):
     for key in dict_extension:
       self[key] = dict_extension[key]

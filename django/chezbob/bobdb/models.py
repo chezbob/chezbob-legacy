@@ -31,7 +31,7 @@ class ProductSource(models.Model):
     description = models.CharField(db_column='source_description',
                                    max_length=255)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.description
 
 class FloorLocations(models.Model):
@@ -42,7 +42,7 @@ class FloorLocations(models.Model):
     name = models.CharField(db_column='name', max_length=255)
     markup = models.FloatField(db_column='markup')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     @classmethod
@@ -87,7 +87,7 @@ class BulkItem(models.Model):
                                 verbose_name="Bulk item barcode",
                                 null=True, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.description
 
     def cost_taxable(self):
@@ -123,7 +123,7 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=12, decimal_places=2)
     bulk = models.ForeignKey(BulkItem, db_column='bulkid', null=True, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s [%s]" % (self.name, self.barcode)
 
     def get_absolute_url(self):
@@ -150,7 +150,7 @@ class DynamicProduct(models.Model):
     bulk = models.ForeignKey(BulkItem, db_column='bulkid', null=True, blank=True)
     userid = models.IntegerField(null=False, blank=False)
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s [%s]" % (self.name, self.barcode)
 
 class HistoricalPrice(models.Model):
@@ -172,7 +172,7 @@ class HistoricalPrice(models.Model):
 #    amount = models.DecimalField(max_digits=12, decimal_places=2)
 #    tax_rate = models.DecimalField(max_digits=6, decimal_places=4)
 #
-#    def __unicode__(self):
+#    def __str__(self):
 #        return "%s %s" % (self.date, self.description)
 #
 #class OrderItem(models.Model):
@@ -203,7 +203,7 @@ class HistoricalPrice(models.Model):
 #    cost_taxable = models.DecimalField(max_digits=12, decimal_places=2)
 #    cost_nontaxable = models.DecimalField(max_digits=12, decimal_places=2)
 #
-#    def __unicode__(self):
+#    def __str__(self):
 #        return "%d %s" % (self.number, self.bulk_type)
 
 # This class doesn't actually connect directly with the underlying database
@@ -215,7 +215,7 @@ class Inventory(models.Model):
     inventoryid = models.AutoField(primary_key=True)
     inventory_time = models.DateTimeField()
 
-    def __unicode__(self):
+    def __str__(self):
         return "#%d %s" % (self.inventoryid, self.inventory_time)
 
     @classmethod

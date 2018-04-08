@@ -94,10 +94,11 @@ def ledger(request, account=None):
 
     # default include_auto, not for general ledger
     include_auto = True
-    if account is None: include_auto = False
+    if account is None:
+        include_auto = False
 
     # parameter override
-    if request.GET.has_key('all'):
+    if 'all' in request.GET:
         if request.GET['all'] != '0':
             include_auto = True
         else:
@@ -115,7 +116,7 @@ def ledger(request, account=None):
                                           .distinct()
 
     transaction_count = all_transactions.count()
-    paginator = Paginator(range(0, transaction_count), count_per_page)
+    paginator = Paginator(list(range(0, transaction_count)), count_per_page)
 
     default_pagenum = paginator.num_pages
     try:
@@ -193,7 +194,7 @@ def edit_transaction(request, transaction=None):
     commit = True               # Is it safe to commit this transaction?
 
     # If the user clicked the "Update" button, don't commit yet.
-    if request.POST.has_key("_update"):
+    if "_update" in request.POST:
         commit = False
 
     # If POST data was submitted, we're in the middle of editing a transaction.
@@ -202,7 +203,7 @@ def edit_transaction(request, transaction=None):
     try:
         transaction.date = parse_date(request.POST['date'])
         transaction.description = request.POST['desc']
-        transaction.auto_generated = request.POST.has_key('auto_generated')
+        transaction.auto_generated = "auto_generated" in request.POST
 
         n = 0
         while True:

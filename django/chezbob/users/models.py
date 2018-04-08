@@ -28,7 +28,7 @@ class User(models.Model):
                                db_column='pref_skip_purchase_confirm')
     notes =    models.CharField(db_column='notes', max_length=1024)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.username
 
 
@@ -40,7 +40,7 @@ class Barcode(models.Model):
     barcode = models.CharField(db_column='barcode', primary_key=True, 
                                max_length=255)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.barcode;
         
 class Transaction(models.Model):
@@ -64,7 +64,5 @@ class Transaction(models.Model):
                                       db_column='finance_trans_id', 
                                       related_name='finance_transaction')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.type;
-   
-

@@ -1,12 +1,11 @@
-import base64, datetime, math
+from __future__ import print_function
+
+import datetime
 from decimal import Decimal
-from time import strptime
 
 from django import forms
 from django.shortcuts import render_to_response, get_object_or_404
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib.auth.decorators import user_passes_test
 from chezbob.bobdb.models import BulkItem
 from chezbob.finance.models import Transaction, Split
 from chezbob.orders.models import Order, OrderItem
@@ -51,10 +50,10 @@ class OrderForm(forms.Form):
   sales_tax_rate = forms.DecimalField(initial=DEFAULT_SALES_TAX)
 
 @edit_orders_required
-def order_summary(request, order): 
-  messages = BobMessages()  
+def order_summary(request, order):
+  messages = BobMessages()
   order = get_object_or_404(Order, id=int(order))
-  
+
   # helper methods
   def simp(obj):
     new = {}
@@ -62,7 +61,7 @@ def order_summary(request, order):
       if not key.startswith("_"):
         new[key] = obj.__dict__[key]
     return new
-  
+
   def order_item_expand(oi):
     oi2 = simp(oi)
     oi.amount = oi.case_cost * oi.cases_ordered
@@ -70,8 +69,8 @@ def order_summary(request, order):
     oi.price_differs = oi.case_cost != oi.bulk_type.price or oi.is_cost_taxed != oi.bulk_type.taxable
     oi.crv_differes = oi.crv_per_unit != oi.bulk_type.crv_per_unit or oi.is_crv_taxed != oi.bulk_type.crv_taxable
     oi.quantity_differs = oi.units_per_case != oi.bulk_type.quantity
-             
-  # handle ajax requests       
+
+  # handle ajax requests
   if 'ajax' in request.POST:
     if request.POST['ajax'] == 'update_bulk_price':
       bulk_id   = request.POST['bulk_id']
@@ -131,18 +130,18 @@ def order_summary(request, order):
       order_item_expand(item)
       messages['new_order_item'] = simp(item)
     elif request.POST['ajax'] == 'update_details':
-      order_form = OrderForm(request.POST);
+      order_form = OrderForm(request.POST)
       if order_form.is_valid():
-        order.date        = order_form.cleaned_data['date'];
-        order.description = order_form.cleaned_data['description'];
-        order.amount      = order_form.cleaned_data['amount'];
+        order.date        = order_form.cleaned_data['date']
+        order.description = order_form.cleaned_data['description']
+        order.amount      = order_form.cleaned_data['amount']
         order.tax_rate    = order_form.cleaned_data['sales_tax_rate']
         order.save()
       else:
         for error_field in order_form.errors:
-          messages.error("Field '%s': %s" % (error_field, order_form[error_field].errors));
+          messages.error("Field '%s': %s" % (error_field, order_form[error_field].errors))
     elif request.POST['ajax'] == 'update_finance_details':
-      print repr(request.POST);
+      print(repr(request.POST))
       order.inventory_adjust = request.POST['inventory_adjust']
       order.supplies_taxed     = request.POST['supply_taxed']
       order.supplies_nontaxed  = request.POST['supply_nontaxed']
@@ -151,25 +150,25 @@ def order_summary(request, order):
       order.returns_nontaxed = request.POST['refund_nontaxed']
       order.save()
     elif request.POST['ajax'] == 'get_bulk_items':
-      bulk_items = BulkItem.objects.all().order_by('description');
+      bulk_items = BulkItem.objects.all().order_by('description')
       simp_bulk_items = []
       for item in bulk_items:
-        simp_bulk_items.append(simp(item));
-      messages['bulk_items'] = simp_bulk_items;
+        simp_bulk_items.append(simp(item))
+      messages['bulk_items'] = simp_bulk_items
     elif request.POST['ajax'] == 'create_transaction':
       bank = request.POST['bank']
       inventory = request.POST['inventory']
       supplies = request.POST['supplies']
-      newTran = Transaction();
-      newTran.date = order.date;
-      newTran.description = order.description;
-      newTran.save();
+      newTran = Transaction()
+      newTran.date = order.date
+      newTran.description = order.description
+      newTran.save()
       Split(transaction=newTran, amount=bank,   account_id=1).save(); # bank
       Split(transaction=newTran, amount=inventory, account_id=5).save(); # inventory
       Split(transaction=newTran, amount=supplies,  account_id=8).save(); # lounge supplies
-      order.finance_transaction = newTran;
-      
-      messages['new_tran_id'] = newTran.id;
+      order.finance_transaction = newTran
+
+      messages['new_tran_id'] = newTran.id
     elif request.POST['ajax'] == 'sync_transaction':
       bank = request.POST['bank']
       inventory = request.POST['inventory']
@@ -185,12 +184,12 @@ def order_summary(request, order):
     else:
       messages.error("unknown ajax command '%s'" % request.POST['ajax'])
     return JsonResponse(messages)
-      
+
   order_form = OrderForm({'date': order.date,
                           'amount': order.amount,
                           'description': order.description,
                           'sales_tax_rate': order.tax_rate})
-                          
+
   if 'save_details' in request.POST:
     order_form = OrderForm(request.POST)
     if order_form.is_valid():
@@ -201,8 +200,8 @@ def order_summary(request, order):
       order.save()
     else:
       for error_field in order_form.errors:
-        messages.error("Field %s: %s" % (error_field, order_form[error_field].errors));
-        
+        messages.error("Field %s: %s" % (error_field, order_form[error_field].errors))
+
   if 'add_item' in request.POST:
     bulk_id = int(request.POST['new_item'])
     cases_count = int(request.POST['new_count'])
@@ -258,7 +257,7 @@ def order_summary(request, order):
 
           # Filling in details for an entry.  If complete, save to the
           # database.
-          if request.POST.has_key('type_code.' + n):
+          if ('type_code.' + n) in request.POST:
               if not number: continue
 
               try:
@@ -313,7 +312,7 @@ def order_summary(request, order):
 
   items = order.orderitem_set.order_by('id')
   for i in items:
-    order_item_expand(i) 
+    order_item_expand(i)
     if i.is_cost_taxed:
       total_taxed += i.amount
     else:
@@ -325,37 +324,37 @@ def order_summary(request, order):
 
   total = total_nontaxed + total_taxed * (1 + order.tax_rate)
   total = total.quantize(Decimal("0.01"))
-  
-  bulk_items = BulkItem.objects.all().order_by('-active', 'description');
+
+  bulk_items = BulkItem.objects.all().order_by('-active', 'description')
   simp_bulk_items = []
   for bi in bulk_items:
     sbi = simp(bi)
     if not bi.active:
       sbi["description"] = '[inactive] ' + sbi["description"]
     simp_bulk_items.append(sbi)
-  
-  messages['transaction'] = False;
-  messages['transaction_complicated'] = False;
-  messages['transaction_bank'] = 0;
-  messages['transaction_inventory'] = 0;
-  messages['transaction_supplies'] = 0;
-  
+
+  messages['transaction'] = False
+  messages['transaction_complicated'] = False
+  messages['transaction_bank'] = 0
+  messages['transaction_inventory'] = 0
+  messages['transaction_supplies'] = 0
+
   if not (order.finance_transaction_id == None):
-    messages['transaction'] = True;
+    messages['transaction'] = True
     splits = order.finance_transaction.split_set.all()
     if len(splits) != 3:
       messages['transaction_complicated'] = True
-    else: 
+    else:
       for split in splits:
         if split.account_id == 1:
           messages['transaction_bank'] = split.amount
         elif split.account_id == 5:
           messages['transaction_inventory'] = split.amount
-        elif split.account_id == 8: 
+        elif split.account_id == 8:
           messages['transaction_supplies'] = split.amount
         else:
           messages['transaction_complicated'] = True
-  
+
   messages.extend({'user': request.user,
                    'title': 'Order Summary - ' + str(order.date),
                    'details_form': order_form,
@@ -367,7 +366,7 @@ def order_summary(request, order):
                    'bulk_items' : simp_bulk_items})
 
   return render_to_response('orders/order_summery.html', messages)
-                               
+
 @edit_orders_required
 def new_order(request):
   order_form = OrderForm()
@@ -384,8 +383,8 @@ def new_order(request):
       return redirect_or_error(reverse(order_summary, args=(newId,)), messages)
     else:
       for error_field in order_form.errors:
-        messages.error("Field %s: %s" % (error_field, order_form[error_field].errors));
-      return error(messages);
+        messages.error("Field %s: %s" % (error_field, order_form[error_field].errors))
+      return error(messages)
   messages.extend({'user': request.user,
                    'title': 'New Order',
                    'details_form': OrderForm(),

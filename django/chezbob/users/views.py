@@ -1,19 +1,17 @@
-import base64, datetime, math
-from decimal import Decimal
-from time import strptime
+
+from __future__ import print_function
 
 from django.shortcuts import render_to_response
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.urlresolvers import reverse
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.db import connection, transaction
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.db.models import F
 
 from chezbob.finance.models import Split, Account
 from chezbob.finance.models import Transaction as FinanceTransaction
 from chezbob.users.models import User, Barcode, Transaction
 from chezbob.users.forms import *
-from chezbob.shortcuts import BobMessages, render_bob_messages, render_or_error, redirect_or_error
+from chezbob.shortcuts import BobMessages, render_or_error, redirect_or_error
 
 
 @login_required
@@ -78,9 +76,9 @@ def new_transaction(type, bound, user, messages):
       otran.user.balance = F('balance') + otran.value
       if not messages.has_errors():
         otran.user.save()
-        messages.note("New transaction generated %s" % unicode(otran))
+        messages.note("New transaction generated %s" % str(otran))
     elif type == 'REIMBURSE':
-      print (bound.cleaned_data)
+      print(bound.cleaned_data)
       ftrans = FinanceTransaction()
       ftrans.date = tran.time
       ftrans.description = "Reimbursing " + user.username + " for " + bound.cleaned_data['note']
@@ -103,8 +101,8 @@ def new_transaction(type, bound, user, messages):
     if not messages.has_errors():
       tran.save()
       user.save()
-    messages.note("New transaction generated %s" % unicode(tran))
-  except Exception, e: # use AS keyword in 2.6+
+    messages.note("New transaction generated %s" % str(tran))
+  except Exception as e:
     messages.error("Exception while creating new transaction: " + str(e))
     import sys, traceback
     exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -119,7 +117,7 @@ def edit_transaction(bound, tran, messages):
     if not bound.is_valid:
       messages.errors(bound.error)
       return
-  except Exception, e: # use AS keyword in 2.6+
+  except Exception as e:
     messages.error("Exception while creating new transaction: " + e.message)
     raise
 
@@ -141,7 +139,7 @@ def delete_transaction(tran, messages):
         otran.user.balance = F('balance') - otran.value
         otran.user.save()
         otran.delete()
-        messages.note("Transaction %s deleted" % unicode(otran))
+        messages.note("Transaction %s deleted" % str(otran))
       else:
         messages.warning("""Could not uniquely identifiy transaction for
                             inverse side of this transaction.  It must be
@@ -154,7 +152,7 @@ def delete_transaction(tran, messages):
     if not messages.has_errors():
       tran.delete()
       user.save()
-      messages.note("Transaction %s deleted" % unicode(tran))
+      messages.note("Transaction %s deleted" % str(tran))
   except Exception as e:
     messages.error("Exception while creating new transaction: " + e.message)
     raise
@@ -235,7 +233,7 @@ def user_details(request, userid):
 
   transactions = Transaction.objects.filter(user=user.id).order_by('-time')
 
-  messages['tools'] = form_types.values()
+  messages['tools'] = list(form_types.values())
 
   if "profile_save" in request.POST:
     bound = ProfileForm(request.POST)

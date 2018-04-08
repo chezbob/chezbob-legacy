@@ -5,6 +5,8 @@ compute daily aggregate purchase/deposit records for insertion into the Chez
 Bob finance system.
 """
 
+from __future__ import print_function
+
 import datetime, time, re, sys
 
 from chezbob.finance.models import Account, Split, Transaction
@@ -201,7 +203,8 @@ def process_log(fp):
 
         if next_date != old_date:
             if old_date is not None:
-                print old_date, deposits, purchases, donations, writeoffs, social_hour
+                print(old_date, deposits, purchases,
+                      donations, writeoffs, social_hour)
                 update_ledger(old_date, deposits / 100.0, purchases / 100.0,
                               donations / 100.0, writeoffs / 100.0,
                               social_hour / 100.0)
@@ -230,10 +233,10 @@ def process_log(fp):
         elif desc == "SOCIAL HOUR":
             social_hour -= amt
         else:
-            print "Unknown transaction entry:", row
+            print("Unknown transaction entry:", row)
             error_flag = True
 
         old_date = next_date
 
     if error_flag:
-        print "Unknown records encountered, results may be off!"
+        print("Unknown records encountered, results may be off!")

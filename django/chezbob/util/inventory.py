@@ -5,6 +5,8 @@ the daily value of the Chez Bob inventory.  Additionally, estimate cost of
 goods sold, profits, and shrinkage.
 """
 
+from __future__ import print_function
+
 import datetime, time, re, sys
 from decimal import Decimal
 
@@ -211,11 +213,11 @@ def bad_summary(start, end=None, commit_start=None):
             old_value = r[0]
 
         if date == commit_start:
-            print "--- COMMITTING ---"
+            print("--- COMMITTING ---")
 
-        print "%s: inventory=%.2f shrinkage=%.2f [old_value=%s delta=%s]" \
-            % (date, inventory_value, losses,
-               old_value, to_decimal(inventory_value) - old_value)
+        print("%s: inventory=%.2f shrinkage=%.2f [old_value=%s delta=%s]"
+              % (date, inventory_value, losses,
+                 old_value, to_decimal(inventory_value) - old_value))
 
         if commit_day is not None and date < commit_start:
             return
@@ -227,11 +229,11 @@ def bad_summary(start, end=None, commit_start=None):
                           VALUES (%s, %s, %s)""",
                        (date, to_decimal(inventory_value), to_decimal(losses)))
 
-    print "Computing initial inventory values..."
+    print("Computing initial inventory values...")
     first_result_seen = False
     for inv in generate_inventory_report(start, end):
         if not first_result_seen:
-            print "Summarizing inventory data..."
+            print("Summarizing inventory data...")
             first_result_seen = True
 
         if inv['date'] != date:
@@ -241,9 +243,9 @@ def bad_summary(start, end=None, commit_start=None):
 
         inventory_value += Decimal(inv['value'])
         if inv['t'] == 'shrinkage':
-            print "  LOSS: $%.02f (%d) %s" \
-                % (-inv['value'], -inv['count'],
-                   BulkItem.objects.get(bulkid=inv['item']).description)
+            print("  LOSS: $%.02f (%d) %s"
+                  % (-inv['value'], -inv['count'],
+                     BulkItem.objects.get(bulkid=inv['item']).description))
             losses -= Decimal(inv['value'])
 
     commit_day()
@@ -259,8 +261,8 @@ def report_inventory(start, end=None):
 
     for inv in generate_inventory_report(start, end):
         if inv['date'] != last_date:
-            print "%s: value=%.2f, shrinkage=%.2f profit=%.2f" % \
-                (last_date, value, shrinkage, profit)
+            print("%s: value=%.2f, shrinkage=%.2f profit=%.2f" %
+                  (last_date, value, shrinkage, profit))
             last_date = inv['date']
             shrinkage = Decimal(0.0)
             profit = Decimal(0.0)
@@ -271,8 +273,8 @@ def report_inventory(start, end=None):
         elif inv['t'] == 'sell':
             profit += inv['income'] + inv['value']
 
-    print "%s: value=%.2f, shrinkage=%.2f profit=%.2f" % \
-        (last_date, value, shrinkage, profit)
+    print("%s: value=%.2f, shrinkage=%.2f profit=%.2f" %
+          (last_date, value, shrinkage, profit))
 
 def item_report(start, end=None):
     """Compute a per-item summary of shrinkage and sales."""
@@ -300,14 +302,14 @@ def item_report(start, end=None):
             items[id]['shrinkage'] += -inv['value']
 
     (sales, shrinkage, cost) = (Decimal(0.0), Decimal(0.0), Decimal(0.0))
-    print "Item\tLocation\tSales\tCost\tShrinkage"
+    print("Item\tLocation\tSales\tCost\tShrinkage")
     for id in items:
         if not sum(abs(items[id][k]) for k in ('sales', 'shrinkage', 'cost')):
             continue
         bulk = BulkItem.objects.get(bulkid=id)
-        print "%s\t%d\t%.2f\t%.2f\t%.2f" % \
-            (bulk.description, bulk.floor_location.id, items[id]['sales'],
-             items[id]['cost'], items[id]['shrinkage'])
+        print("%s\t%d\t%.2f\t%.2f\t%.2f" %
+              (bulk.description, bulk.floor_location.id, items[id]['sales'],
+               items[id]['cost'], items[id]['shrinkage']))
         sales += items[id]['sales']
         shrinkage += items[id]['shrinkage']
         cost += items[id]['cost']
@@ -342,14 +344,14 @@ def category_report(start, end=None):
             groups[g]['shrinkage'] += -inv['value']
 
     for g in sorted(groups.keys()):
-        print "%s:" % (g,)
+        print("%s:" % (g,))
         i = groups[g]
         for k in ('sales', 'cost', 'shrinkage'):
-            print "    %s = %.2f" % (k, i[k])
-        print "    profit = %.2f" % (i['sales'] - i['cost'] - i['shrinkage'],)
+            print("    %s = %.2f" % (k, i[k]))
+        print("    profit = %.2f" % (i['sales'] - i['cost'] - i['shrinkage'],))
         try:
-            print "    loss_pct = %.2f%%" % (
-                (i['shrinkage'] / (i['shrinkage'] + i['cost']) *
-                 Decimal(100.0),))
+            print("    loss_pct = %.2f%%" % (
+                  (i['shrinkage'] / (i['shrinkage'] + i['cost']) *
+                   Decimal(100.0),)))
         except ZeroDivisionError:
             pass

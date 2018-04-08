@@ -29,7 +29,7 @@ class Order(models.Model):
 
     finance_transaction = models.ForeignKey(Transaction)
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s %s" % (self.date, self.description)
 
 
@@ -69,5 +69,5 @@ class OrderItem(models.Model):
     # order_item has a problem that needs resolution.
     cases_scanned = models.IntegerField(db_column='n_scanned')
 
-    def __unicode__(self):
+    def __str__(self):
         return "%d %s" % (self.cases_ordered, self.bulk_type)

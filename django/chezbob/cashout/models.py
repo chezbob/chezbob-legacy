@@ -8,7 +8,7 @@ class Entity(models.Model):
 
     name = models.CharField(max_length=256, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s" % self.name
 
 
@@ -20,7 +20,7 @@ class CashOut(models.Model):
     datetime = models.DateTimeField('Collection Time')
     notes = models.TextField()
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s %s" % (self.datetime, self.notes)
 
     @classmethod
@@ -69,59 +69,60 @@ class CashCount(models.Model):
     coin5   = models.IntegerField('&cent;5')
     coin1   = models.IntegerField('&cent;1')
     other   = models.DecimalField(max_digits=12, decimal_places=2)
-    total   = models.DecimalField(max_digits=12, decimal_places=2, editable=False)
+    total = models.DecimalField(
+        max_digits=12, decimal_places=2, editable=False)
 
     # Meta-data
     fields = (
-            'bill100',
-            'bill50',
-            'bill20',
-            'bill10',
-            'bill5',
-            'bill1',
-            'coin25',
-            'coin10',
-            'coin5',
-            'coin1',
-            'other',
-            'coin100',
-            'coin50',
-            'total'
-            )
+        'bill100',
+        'bill50',
+        'bill20',
+        'bill10',
+        'bill5',
+        'bill1',
+        'coin25',
+        'coin10',
+        'coin5',
+        'coin1',
+        'other',
+        'coin100',
+        'coin50',
+        'total'
+    )
 
-    field_names = map(mark_safe, (
-            '$100',
-            '$50',
-            '$20',
-            '$10',
-            '$5',
-            '$1',
-            '&cent;25',
-            '&cent;10',
-            '&cent;5',
-            '&cent;1',
-            'other',
-            '&cent;100',
-            '&cent;50',
-            'total'
-            ))
+    field_names = list(map(mark_safe, (
+        '$100',
+        '$50',
+        '$20',
+        '$10',
+        '$5',
+        '$1',
+        '&cent;25',
+        '&cent;10',
+        '&cent;5',
+        '&cent;1',
+        'other',
+        '&cent;100',
+        '&cent;50',
+        'total'
+    )))
 
     field_values = {
-            'bill100' : 100,
-            'bill50' : 50,
-            'bill20' : 20,
-            'bill10' : 10,
-            'bill5' : 5,
-            'bill1' : 1,
-            'coin25' : Decimal("0.25"),
-            'coin10' : Decimal("0.10"),
-            'coin5' : Decimal("0.05"),
-            'coin1' : Decimal("0.01"),
-            'other' : 1,
-            'coin100' : 1,
-            'coin50' : Decimal("0.50"),
-            'total' : 1
-            }
+        'bill100': 100,
+        'bill50': 50,
+        'bill20': 20,
+        'bill10': 10,
+        'bill5': 5,
+        'bill1': 1,
+        'coin25': Decimal("0.25"),
+        'coin10': Decimal("0.10"),
+        'coin5': Decimal("0.05"),
+        'coin1': Decimal("0.01"),
+        'other': 1,
+        'coin100': 1,
+        'coin50': Decimal("0.50"),
+        'total': 1
+    }
 
 
     def save(self):

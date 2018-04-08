@@ -48,7 +48,7 @@ def ledger(request):
 
     cashout_count = CashOut.objects.count()
     all_cashouts = CashOut.objects.all().order_by('datetime')
-    paginator = Paginator(range(0, cashout_count), count_per_page)
+    paginator = Paginator(list(range(0, cashout_count)), count_per_page)
 
     default_pagenum = paginator.num_pages
     try:
@@ -82,7 +82,7 @@ def ledger(request):
         balance += total
 
         cashouts.append({
-            'info': c, 
+            'info': c,
             'counts': cashcount_list,
             'total':total,
             'balance':balance
@@ -102,7 +102,7 @@ def cashonhand(request):
 
     cashout_count = CashOut.objects.count()
     all_cashouts = CashOut.objects.all().order_by('datetime')
-    paginator = Paginator(range(0, cashout_count), count_per_page)
+    paginator = Paginator(list(range(0, cashout_count)), count_per_page)
 
     default_pagenum = paginator.num_pages
     try:
@@ -124,7 +124,7 @@ def cashonhand(request):
 
     onhand_total = CashCount.totals_before(page_cashouts[0])
     for f in fields:
-        if not onhand_total.has_key(f) or onhand_total[f] is None:
+        if f not in onhand_total or onhand_total[f] is None:
             onhand_total[f] = 0
 
     m = re.compile(r'^(?:bill|coin)')
@@ -145,7 +145,7 @@ def cashonhand(request):
                 else:
                     cashcount.append("%.2f" % (s.__dict__[f]))
 
-            cashcount_list.append({'count':cashcount, 
+            cashcount_list.append({'count':cashcount,
                                    'entity':s.entity})
 
         total = []
@@ -182,9 +182,8 @@ def edit_cashout(request, cashout=None):
 
     fields = CashCount.fields
     field_values = CashCount.field_values
-    field_names = CashCount.field_names
 
-    if request.POST.has_key("_update"):
+    if "_update" in request.POST:
         commit = False
 
     try:
@@ -294,45 +293,42 @@ def edit_cashout(request, cashout=None):
     entitys = Entity.objects.order_by('name')
     if len(counts) == 0:
         for e in entitys:
-            if not e in map(lambda s:s['entity'], counts):
-                counts.append({'memo': "", 
-                              'entity': e,
-                              'count_value':blank_values})
+            if e not in [s['entity'] for s in counts]:
+                counts.append({'memo': "",
+                               'entity': e,
+                               'count_value': blank_values})
 
     for i in range(1):
-        counts.append({'memo': "", 'count_value':blank_values})
+        counts.append({'memo': "", 'count_value': blank_values})
 
-    return render_to_response('cashout/cashout_update.html',
-                              {
-                               'user': request.user,
-                               'entitys': entitys,
-                               'cashout': cashout,
-                               'cashcounts': counts,
-                               'fields' : CashCount.fields,
-                               'field_names': CashCount.field_names,
-                               'field_index' : range(0,
-                                                     len(CashCount.fields[:-1]))
-                              }
-                              )
+    return render_to_response(
+        'cashout/cashout_update.html',
+        {
+           'user': request.user,
+           'entitys': entitys,
+           'cashout': cashout,
+           'cashcounts': counts,
+           'fields': CashCount.fields,
+           'field_names': CashCount.field_names,
+           'field_index': list(range(0, len(CashCount.fields[:-1])))
+        }
+    )
 
 @edit_perm_required
 def gen_transaction(request, cashout):
     cashout = get_object_or_404(CashOut, id=int(cashout))
-   
-    transaction = finance.Transaction(date=datetimetodate(
-                                                str(cashout.datetime)
-                                                         ), 
-                                      auto_generated=False)
 
+    transaction = finance.Transaction(
+        date=datetimetodate(str(cashout.datetime)), auto_generated=False)
 
     splits = []
 
     account_name = {
-            'cash' : 7,
-            'collected' : 24,
-            'bank' : 1,
-            'inventory' : 5
-            }
+        'cash': 7,
+        'collected': 24,
+        'bank': 1,
+        'inventory': 5
+    }
 
     balance = 0
     for c in cashout.cashcount_set.all().order_by('entity'):
@@ -346,7 +342,7 @@ def gen_transaction(request, cashout):
                                         id=int(account_name['cash'])
                                                           )
 
-            split['memo'] = c.entity.name 
+            split['memo'] = c.entity.name
 
         elif c.entity.name in ("To Bank"):
             split['account'] = finance.Account.objects.get(
@@ -377,7 +373,7 @@ def gen_transaction(request, cashout):
     if balance < 0: s['credit'] = -balance
 
     splits.append(s)
-                
+
 
     return render_to_response('finance/transaction_update.html',
                               {
