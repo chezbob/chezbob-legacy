@@ -178,8 +178,7 @@ def raw_table(request, query):
     This isn't meant to be displayed directly, but instead included as part of
     a larger page by JavaScript code to dynamically generate a results page."""
 
-    response = HttpResponse(mimetype="text/html")
+    response = HttpResponse()
     for line in generate_table(query, request):
         response.write(line)
     return response
-

@@ -17,7 +17,7 @@ class CharNullField(models.CharField):
             return ""
         else:
             return value
-    def get_db_prep_value(self, value):
+    def get_db_prep_value(self, value, connection, prepared=False):
         if value=="":
             return None
         else:
