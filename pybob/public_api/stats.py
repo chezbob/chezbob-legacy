@@ -9,10 +9,14 @@ import string
 from flask import Blueprint, jsonify
 from flask_cors import cross_origin
 
-from .bob_api import bobapi
+from private_api.bob_api import bobapi
 
 
 blueprint = Blueprint('dashboard', __name__)
+
+
+def fix_decimals(x):
+    return x
 
 
 def anonymize(inp):
@@ -88,6 +92,7 @@ def get_sales_stats(bulkid, window):
 def get_aggregate_sales():
     def fix(x):
         x['date'] = str(x['date'])
+        x['revenue'] = float(x['revenue'])
         return x
 
     return generic_wrapper(bobapi.get_daily_aggregate_stats, repair_func=fix)
@@ -100,6 +105,7 @@ def get_day_sales():
 
     def strip(x):
         # Strip out anything sensitive
+        x = fix_decimals(x)
         result = {
             'xacttime': str(x['xacttime']),
             'xactvalue': x['xactvalue'],
@@ -119,6 +125,7 @@ def get_month_transactions():
 
     def strip(x):
         # Strip out anything sensitive
+        x = fix_decimals(x)
         result = {
             'barcode': x['barcode'],
             'bulkid': x['bulkid'],
@@ -163,8 +170,7 @@ def get_barcode_details(bc):
 def generic_wrapper(func, repair_func=None,
                     singleton=False, nolist=False, **kwargs):
     if not repair_func:
-        def repair_func(x):
-            return x
+        repair_func = fix_decimals
 
     try:
         raw_result = func(**kwargs)
@@ -173,7 +179,7 @@ def generic_wrapper(func, repair_func=None,
             result = repair_func(dict(raw_result))
         else:
             result = [dict(x) for x in raw_result]
-            result = map(repair_func, result)
+            result = list(map(repair_func, result))
 
         if singleton:
             result = result[0]
@@ -183,4 +189,3 @@ def generic_wrapper(func, repair_func=None,
     except:
         import traceback
         traceback.print_exc()
-

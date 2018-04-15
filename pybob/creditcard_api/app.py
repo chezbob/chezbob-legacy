@@ -3,14 +3,28 @@ import sys
 import stripe
 
 from flask import Flask, jsonify, request
+from flask.json import JSONEncoder
 
-from .bob_api import BobApi
-from .creds import DB_CREDS, STRIPE_API_KEY_LIVE
+from private_api import db
+from private_api.bob_api import BobApi
+from secrets import get_secret
+
+import decimal
+
+
+class DecimalFriendlyJSONEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, decimal.Decimal):
+            return float(obj)
+        return super().default(obj)
+
 
 app = Flask(__name__)
+app.json_encoder = DecimalFriendlyJSONEncoder
 
-bobapi = BobApi(DB_CREDS)
-stripe.api_key = STRIPE_API_KEY_LIVE
+conn = db.get_conn()
+bobapi = BobApi(conn)
+stripe.api_key = get_secret("stripe.live_key")
 
 
 # TODO - make things log in a better way. This dumps to apache's error logs.
@@ -52,7 +66,7 @@ def deposit():
     try:
         credit_amount = round(float(credit_amount))
         charged_amount = int(charged_amount)
-    except:
+    except Exception:
         log(("ERROR: Received request to charge {} {} cents for {} cents"
              " credit, but the amounts weren't convertible to ints.").format(
                  username, charged_amount, credit_amount))
@@ -90,13 +104,14 @@ def deposit():
         error = "card declined"
     else:
         try:
-            bobapi.make_deposit(username, credit_amount / 100)
+            bobapi.make_deposit(username, credit_amount / 100,
+                                'BY CC', 'webpayment')
             success = True
         except bobapi.InvalidOperationException as e:
             error = (
                 "Error: {} (but card charged). "
                 "Please contact Chez Bob for assistance.".format(e))
-        except:
+        except Exception as e:
             error = (
                 "Unknown error (but card charged). "
                 "Please contact Chez Bob for assistance.".format(e))
@@ -109,4 +124,3 @@ def deposit():
         log(("SUCCESS: Charged {} {} cents for {} cents credit.").format(
             username, charged_amount, credit_amount))
     return jsonify({"success": success, "error": error})
-

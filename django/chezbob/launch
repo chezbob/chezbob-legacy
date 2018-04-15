@@ -1,10 +1,15 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 #
 # Execute bits of the Chez Bob Django code, initializing Django appropriately.
 # Some of this code is copied from the django.core.management module, since it
 # doesn't seem that the code there is easily extensible.
 
-import codecs, datetime, locale, os, sys
+import datetime
+import os
+import sys
+
+import django
+import chezbob
 
 # Read in the settings module and initialize Django.
 project_directory = os.path.dirname(sys.argv[0])
@@ -12,7 +17,9 @@ sys.path.append(project_directory)
 sys.path.append(os.path.join(project_directory, '..'))
 
 # Allow non-ASCII characters on output even if stdout is redirected.
-sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
+# This causes odd errors in python 3... and we want everything unicoded anyway,
+# which is now the default.
+#sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
 
 try:
     import settings
@@ -21,8 +28,10 @@ except ImportError:
                      % project_directory)
     sys.exit(1)
 
-import chezbob
 os.environ['DJANGO_SETTINGS_MODULE'] = 'chezbob.settings'
+
+django.setup()
+
 
 def html_dump(func, title=""):
     """Call the given function to dump a static HTML data page.
@@ -36,7 +45,8 @@ def html_dump(func, title=""):
 <head>
 <title>%s</title>
 <script type="text/javascript" src="/js/jquery.js"></script>
-<script type="text/javascript" src="/js/tablesorter/jquery.tablesorter.js"></script>
+<script type="text/javascript" src="/js/tablesorter/jquery.tablesorter.js">
+    </script>
 <link rel="stylesheet" type="text/css" href="/js/tablesorter/style.css" />
 <body>
 <h1>%s</h1>

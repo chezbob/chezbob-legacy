@@ -1,4 +1,4 @@
-#!/usr/bin/python3.4
+#!/usr/bin/env python3
 """Hacky script to send reminders/notifications triggered by cron."""
 
 import datetime
@@ -17,9 +17,7 @@ BOB_PATH = os.environ.get('CHEZ_BOB_PATH', '/git')
 sys.path.insert(0, os.path.join(BOB_PATH, 'pybob'))
 
 from private_api import db, bob_api
-
 from bobslack import public_slack, private_slack
-
 
 ORDER_WATCHER_FILE = "/git/www/playground/order_watch.json"
 ORDER_WATCHER_FILE_CONTENTS = (
@@ -36,7 +34,7 @@ SODA_MACHINE_N_BILLS_EMPTY_THRESHOLD = 110
 DB_CONFIG_FILE = os.path.join(BOB_PATH, "db.conf")
 
 # Email notification infno
-FROM_ADDRESS = "Chez Bob <bobbot@chezbob.ucsd.edu>"
+FROM_ADDRESS = "Chez Bob <bobbot@chezbob.net>"
 REPLY_TO_ADDRESS = "Chez Bob <chezbob@cs.ucsd.edu>"
 DEFAULT_SUBJECT = "Chez Bob debt reminder"
 

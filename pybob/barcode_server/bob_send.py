@@ -1,12 +1,9 @@
 """Simple interface for sending barcodes, etc. back to the server."""
 
-import sys
-
-
 from json_rpc_client import JsonRpcClient
 
 
-class BobApi(object):
+class Bob2k14Api(object):
     def __init__(self, endpoint, client_type, client_id):
         """
         Arguments:
@@ -24,11 +21,3 @@ class BobApi(object):
     def send_barcode(self, barcode):
         args = [self.client_type, self.client_id, None, barcode]
         return self.client.call("Soda.remotebarcode", *args)
-
-
-def main():
-    pass
-
-if __name__ == "__main__":
-    sys.exit(main())
-

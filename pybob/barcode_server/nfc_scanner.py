@@ -40,7 +40,7 @@ class NFCScanner(object):
             if tag.product == 'Type4Tag':
                 print("Ignoring type4tag")
                 barcode = None
-            
+
             now = time.time()
             cutoff = now - DEBOUNCE_TIME
             if self.last_s and self.last_t > cutoff:
@@ -49,11 +49,6 @@ class NFCScanner(object):
                 self.last_s = barcode
 
             self.last_t = now
-
-        #if verify:
-        #    _, bc2 = self.get_barcode(False)
-        #    if bc2 != barcode:
-        #        return self.get_barcode()
 
         return 0, barcode
 
@@ -76,4 +71,3 @@ class NFCScanner(object):
 
 if __name__ == "__main__":
     sys.exit(1)
-

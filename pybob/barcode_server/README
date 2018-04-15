@@ -1,14 +1,30 @@
 
 This directory contains two barcode servers (daemons):
- - a drop-in replacement of barcoded/barcodeid from bob2k14 (barcode_server.py)
- - a similar server using crossbar/wamp, used by espresso (barcode_server_wamp.py)
+ - a nearly-drop-in replacement of barcode[i]d from bob2k14 (barcode_server.py)
+ - a similar server using crossbar, used by espresso (barcode_server_wamp.py)
 
-The barcode scanner supports:
+The barcode scanners support:
  - Serial barcode scanners (like the one bolted to the soda machine)
  - HID (keyboard-emulating) barcode scanners (like main term's and espresso's)
  - NFC readers
 
-NFC readers are a hack. It only runs under python2.7 because the NFC library
-didn't support python3 as of writing. We present the NFC tag's serial number of
-(prepended with "NFC:") as a barcode. Everwhere else sees NFC tags as barcodes.
+NFC reader support is hacky. It only runs under python2.7 because the NFC
+library didn't support python3 as of writing. We present the NFC tag's serial
+number of (prepended with "NFC:") as a barcode. Everwhere else sees NFC tags as
+barcodes.
 
+This directory is basically the only thing left on python2.7. Thus it needs its
+OWN virtualenv that is shared between both barcode servers.
+
+You need to create it like this:
+    $ virtualenv -p python2.7 env2.7
+    $ . env2.7/bin/activate
+    $ pip2 install -r requirements.txt
+    $ deactivate
+
+If you don't want/need NFC support, than the whole thing will happily run under
+python3 if you have the applicable packages installed.
+
+The configuration of the barcode server is slightly different than that of
+bob2k14's barcode server, but once you handle configuration, it will happily
+speak to sodad.

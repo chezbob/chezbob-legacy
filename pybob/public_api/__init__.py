@@ -1,4 +1,3 @@
 """Public Web API"""
 
-from app import *
-
+from .app import *

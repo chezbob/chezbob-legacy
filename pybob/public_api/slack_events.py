@@ -16,12 +16,14 @@ from slackclient import SlackClient
 
 from . import slack_commands
 
+from secrets import get_secret
+
 
 blueprint = Blueprint('slack_events', __name__)
 
 
-from .creds import SLACK_VERIFICATION_TOKEN, SLACK_UCSDCSE_TOKEN
-sc = SlackClient(SLACK_UCSDCSE_TOKEN)
+SLACK_VERIFICATION_TOKEN = get_secret('slack.ucsdcse_verification_token')
+sc = SlackClient(get_secret('slack.ucsdcse_token'))
 
 
 # Slack event handlers -- populated via decorator
@@ -135,4 +137,3 @@ def slack_request():
              "error": "Unhandled event type: {}".format(callback)})
 
     return response_gen(callback)
-

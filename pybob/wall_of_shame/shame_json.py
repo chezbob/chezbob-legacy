@@ -1,4 +1,4 @@
-#!/usr/bin/python3.4
+#!/usr/bin/env python3
 """Super-fast hacky way to support an updateable shaming dashboard."""
 
 import json

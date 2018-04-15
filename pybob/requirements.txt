@@ -1,0 +1,9 @@
+flask
+flask-cors
+flask-limiter
+psycopg2-binary
+slackclient
+stripe
+python-jose
+sh
+arrow

@@ -4,7 +4,7 @@ import sys
 from flask import Blueprint, jsonify
 from flask_cors import cross_origin
 
-from .bob_api import bobapi
+from private_api.bob_api import bobapi
 
 from jinja2 import Environment, FileSystemLoader
 

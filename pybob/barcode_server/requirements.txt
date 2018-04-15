@@ -1,0 +1,10 @@
+# These are the requirements for the python2.7-based barcode servers.
+# See README for more info.
+autobahn
+evdev
+requests
+serial
+twisted
+txaio
+# Omit this line to function under python3:
+nfcpy

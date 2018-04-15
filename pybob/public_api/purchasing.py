@@ -4,11 +4,12 @@ import sys
 from flask import Blueprint, jsonify, request
 from flask_cors import cross_origin
 
-from .bob_api import bobapi, InvalidOperationException
+from private_api.bob_api import bobapi, InvalidOperationException
 from .userauth import decodetoken
 
 
 blueprint = Blueprint('purchasing', __name__)
+
 
 ACCEPTABLE_SOURCES = ['elektra', 'mobile', 'web']
 

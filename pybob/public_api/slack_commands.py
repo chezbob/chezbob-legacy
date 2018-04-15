@@ -2,15 +2,13 @@
 
 import json
 import requests
-#import sys
 import time
 
 
 from flask import Blueprint, jsonify, request
 from flask_cors import cross_origin
 
-from .bob_api import bobapi
-
+from private_api.bob_api import bobapi
 
 WAMP_CALLPOINT = "https://chezbob.ucsd.edu:8095/call"
 
@@ -147,4 +145,3 @@ def wall_of_shame():
     })
 
     return jsonify(response)
-

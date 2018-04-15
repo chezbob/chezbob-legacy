@@ -8,7 +8,6 @@ import requests
 
 
 def _get_random_id():
-    #return random.randint(-sys.maxsize - 1, sys.maxsize)
     return random.randint(0, sys.maxsize)
 
 
@@ -18,7 +17,7 @@ class JsonRpcClient(object):
     def __init__(self, endpoint):
         self.headers = {'Content-Type': 'application/json'}
         self.endpoint = endpoint
-    
+
     def call(self, fn_name, *params):
         request_id = _get_random_id()
         payload = {
@@ -34,6 +33,6 @@ class JsonRpcClient(object):
 
         return response
 
+
 if __name__ == "__main__":
     sys.exit(1)
-

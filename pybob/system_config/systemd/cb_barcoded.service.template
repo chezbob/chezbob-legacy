@@ -1,0 +1,24 @@
+# This is the script for running the barcode server.
+#
+# IMPORTANT: Include scanner details in /etc/chezbob.json
+#
+# This can be installed in /etc/systemd/system/multi-user.target.wants
+
+[Unit]
+Description=Chez Bob Barcode Scanner Service
+After=network.target
+Before=display-manager.service
+
+[Service]
+Type=simple
+User=sodasrv
+Group=sodasrv
+WorkingDirectory=/git/pybob/barcode_server
+ExecStart=/git/pybob/barcode_server/run_env2.7.sh /git/pybob/barcode_server/barcode_server.py -c /etc/chezbob.json
+
+StandardOutput=/var/log/chezbob/cb_barcoded.out
+StandardError=/var/log/chezbob/cb_barcoded.err
+
+[Install]
+WantedBy=multi-user.target
+

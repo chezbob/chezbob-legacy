@@ -1,4 +1,9 @@
-"""A simple serial-reading scanner interface."""
+"""A simple serial-reading scanner interface.
+
+The beeps are available on many Honeywell/Handheld Products scanners, but
+shouldn't hurt anything on other serial scanners.
+
+"""
 
 import sys
 
@@ -12,6 +17,7 @@ def _mkcmd(scanner_id, parts):
     """Generate the command from its parts."""
     res = str(scanner_id).encode()
     return res + ESC + parts + b","
+
 
 _BAD_COMMAND = b"b"
 _OK_COMMAND = b"a"
@@ -55,6 +61,6 @@ class SerialBarcodeScanner(object):
         """Whether or not we support beeping."""
         return True
 
+
 if __name__ == "__main__":
     sys.exit(1)
-

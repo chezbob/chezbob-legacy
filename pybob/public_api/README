@@ -1,19 +1,6 @@
 
 This is the API that's exposed at /api on the public web.
 
-Rather confusingly, as of this writing, this code is running under python2.7
-while (almost) everything else is python3.
-
-The biggest reason for this (other than the server is out of date) is that
-the ancient version of django that we're running is written for python2.7.
-
-This means that we can't use most of the other helper modules we've assembled
-in the parent directory.
-
-Since this grew organically, there are several duplicates in this directory.
-A TODO is to move everything to python3.
-
-It probably leaks data that we don't want to leak. Another good TODO is to
-decide whether we want to remove some of this functionality, or at a minimum,
-add rate limiting.
+It probably leaks data that we don't want to leak. A good TODO is to decide
+whether we want to remove some functionality, or at a minimum, rate limit.
 

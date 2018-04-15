@@ -1,0 +1,16 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+name = "pypi"
+verify_ssl = true
+
+[dev-packages]
+
+[requires]
+python_version = "3.5"
+
+[packages]
+crossbar = "*"
+"psycopg2" = "*"
+sh = "*"
+twisted = "*"
+autobahn = "*"

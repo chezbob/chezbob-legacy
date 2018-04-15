@@ -7,14 +7,14 @@ from flask_cors import cross_origin
 
 from jose import jwt, JWTError
 
-from .bob_api import bobapi
-from .creds import JWT_SECRET, JWT_ALGO
-
+from secrets import get_secret
+from private_api.bob_api import bobapi
 
 VALID_FOR_TIME_S = 300
+JWT_SECRET = get_secret('jwt.secret')
+JWT_ALGO = get_secret('jwt.algo')
 
 blueprint = Blueprint('userauth', __name__)
-
 
 """
 >>> token = jwt.encode({'key': 'value'}, JWT_SECRET, algorithm=JWT_ALGO)
@@ -93,4 +93,3 @@ def _validate_token():
     result['result'] = 'success'
 
     return jsonify(result)
-

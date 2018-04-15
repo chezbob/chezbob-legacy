@@ -1,0 +1,13 @@
+
+This folder contains a bunch of python used throughout Chez Bob.
+
+For the most part, it runs under python3. You should use a virtualenv. We'd be
+using pipenv, but getting that to work cleanly with apache wsgi is trickier.
+
+The virtualenv should be stored within this directory at env/. The
+requirements.txt file has the packages you need.
+
+This directory is diverse. While it is configured to be mostly include-able
+from python, it contains a bunch of distinct elements. Hopefully many of them
+have READMEs of their own.
+

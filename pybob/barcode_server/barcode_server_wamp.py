@@ -1,5 +1,5 @@
-#!/usr/local/bin/python3.4
-"""TODO: Change me!"""
+#!/usr/bin/env python
+"""A WAMP/crossbar-based barcode server."""
 
 from __future__ import print_function
 
@@ -8,16 +8,8 @@ import logging
 import threading
 import six
 
-#from twisted.internet import reactor
-#from twisted.internet.defer import inlineCallbacks
-#from twisted.internet.task import LoopingCall
-#from twisted.internet.error import ReactorNotRunning
-
-#from autobahn import wamp
-#from autobahn.wamp.exception import ApplicationError
 from autobahn.twisted.wamp import ApplicationSession
 from autobahn.twisted.wamp import ApplicationRunner
-#from autobahn.twisted.choosereactor import install_reactor
 
 import txaio
 
@@ -85,7 +77,6 @@ class BarcodeSender(ApplicationSession):
             self.log.info(barcode)
             self.publish(u'{}.barcode'.format(self._prefix), barcode)
 
-    #@inlineCallbacks
     def onJoin(self, details):
         print("OnJoin called")
 
@@ -94,7 +85,6 @@ class BarcodeSender(ApplicationSession):
 
         self._prefix = u'chezbob.scanner.{}'.format(args.NAME)
 
-        # TODO - scanners
         self._thread_should_exit = threading.Event()
         self._thread = threading.Thread(target=self._send_thread)
         self._thread.daemon = True
