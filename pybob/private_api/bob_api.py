@@ -32,9 +32,23 @@ class BobApi(object):
     def _get_cursor(self):
         return self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
+    def is_valid_userid(self, userid):
+        """Given a userid, return whether or not it's valid. """
+        cursor = self._get_cursor()
+        query = ("SELECT balance FROM users WHERE userid = %s")
+        cursor.execute(query, [userid])
+        return cursor.rowcount > 0
+
     def is_valid_username(self, username):
         """Given a username, return whether or not it's valid. """
         return self.get_userid(username) is not None
+
+    def is_valid_product_barcode(self, barcode):
+        """Return whether or not a barcode is associated with a product. """
+        cursor = self._get_cursor()
+        query = ("SELECT name FROM products WHERE barcode = %s")
+        cursor.execute(query, [barcode])
+        return cursor.rowcount > 0
 
     def get_balance(self, username):
         """Given a username, returns their balance, or None. """
@@ -441,6 +455,53 @@ ORDER BY balance ASC
         cursor.execute(query)
         self.db.commit()
         return cursor
+
+    def buy_barcode(self, userid, barcode, source='UNKNOWN'):
+        """Purchases item by barcode for given userid."""
+
+        if not self.is_valid_userid(userid):
+            raise InvalidOperationException("Invalid userid")
+
+        if not self.is_valid_product_barcode(barcode):
+            raise InvalidOperationException("Invalid barcode")
+
+        purchase_query = """
+            INSERT INTO transactions (
+                userid, xactvalue, xacttype, barcode, source)
+            SELECT
+                %s,
+                -1 * price,
+                (case when price < 0 then 'ADD ' else 'BUY ' end ) || name,
+                barcode, %s
+            FROM dynamic_barcode_lookup WHERE barcode = %s AND userid = %s LIMIT 1
+            RETURNING *
+        """
+
+        balance_query = """
+            UPDATE users SET balance = balance + %s WHERE userid = %s
+            RETURNING balance
+        """
+
+        cursor = self._get_cursor()
+        cursor.execute(purchase_query, [userid, source, barcode, userid])
+
+        if not cursor.rowcount:
+            self.db.rollback()
+            raise InvalidOperationException("Couldn't insert transaction")
+
+        row = cursor.fetchone()
+        results = dict(row)
+
+        cursor.execute(balance_query, [row['xactvalue'], userid])
+
+        row = cursor.fetchone()
+        if cursor.rowcount != 1:
+            self.db.rollback()
+            raise InvalidOperationException("Couldn't update balance")
+
+        self.db.commit()
+        results['balance'] = row['balance']
+        return results
 
     def _fetchall(self, query, *args, **kwargs):
         cursor = self._get_cursor()
