@@ -45,6 +45,18 @@ def shame():
     return jsonify(result)
 
 
+@blueprint.route('/thank', methods=['POST', 'GET'])
+@cross_origin()
+def thank():
+    form = request.form
+    result = {
+        "response_type": "in_channel",
+        "text": "Thanks a ton to {}!".format(form['text'])
+    }
+
+    return jsonify(result)
+
+
 @blueprint.route('/coldbrew', methods=['POST', 'GET'])
 @cross_origin()
 def coldbrew_slack_slash():
