@@ -5,14 +5,14 @@ coldbrew.GRAPH_LABEL = 'Cold Brew';
 coldbrew.CHART_OPTIONS = {
     width: 650,
     height: 650,
-    greenFrom: 10,
+    greenFrom: 40,
     greenTo: COLDBREW_MAXIMUM,
     redFrom: 0,
-    redTo: 5,
-    yellowFrom: 5,
-    yellowTo: 10,
+    redTo: 10,
+    yellowFrom: 10,
+    yellowTo: 40,
     majorTicks: null,  // Defined in init();
-    minorTicks: 5,
+    minorTicks: 10,
     max: COLDBREW_MAXIMUM,
 };
 
