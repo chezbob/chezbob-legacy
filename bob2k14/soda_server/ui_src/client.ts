@@ -722,6 +722,7 @@ export class Client
         $("#profile-btn").on('click', function() {
             $("#profile-username").val(client.current_user.username);
             $("#profile-email").val(client.current_user.email)
+	    $("#profile-nickname").val(client.current_user.nickname);
         });
 
         $("#profilebarcode-btn").on('click', function()
@@ -767,6 +768,12 @@ export class Client
                 $("#setpassword-confirm-div").addClass('hidden');
             }
         });
+
+	$("#personalinfoform").on('submit', function(e) {
+	    client.log.info("Begin personal info change request.");
+	    e.preventDefault();
+	    client.server_channel.change_personal_info($("#profile-nickname").val());
+	});
 
         $("#setpassword-confirm").on('input', function(e)
                 {
