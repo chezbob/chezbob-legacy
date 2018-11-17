@@ -320,7 +320,11 @@ export class Client
                         $("#barcodes-table tbody").empty();
                         $.each(barcodes, function (idx, barcode)
                             {
-                                $("#barcodes-table tbody").append('<tr><td>' + barcode.barcode + '</td><td><a href="#" class="btn btn-danger deregisterbarcode" data-barcode="' + barcode.barcode + '">Forget</a></td></tr>');
+                                var forgetButton = $('<a href="#" class="btn btn-danger deregisterbarcode">Forget</a>)');
+				forgetButton.data("barcode", barcode.barcode);
+				var row = $('<tr><td>' + barcode.barcode + '</td></tr>');
+				row.append(forgetButton);
+                                $("#barcodes-table tbody").append(row);
                             });
                         $(".deregisterbarcode").on('click', function(e)
                             {
