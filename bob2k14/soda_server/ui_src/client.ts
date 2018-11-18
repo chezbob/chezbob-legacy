@@ -320,7 +320,11 @@ export class Client
                         $("#barcodes-table tbody").empty();
                         $.each(barcodes, function (idx, barcode)
                             {
-                                $("#barcodes-table tbody").append('<tr><td>' + barcode.barcode + '</td><td><a href="#" class="btn btn-danger deregisterbarcode" data-barcode="' + barcode.barcode + '">Forget</a></td></tr>');
+                                var forgetButton = $('<a href="#" class="btn btn-danger deregisterbarcode">Forget</a>)');
+				forgetButton.data("barcode", barcode.barcode);
+				var row = $('<tr><td>' + barcode.barcode + '</td></tr>');
+				row.append(forgetButton);
+                                $("#barcodes-table tbody").append(row);
                             });
                         $(".deregisterbarcode").on('click', function(e)
                             {
@@ -722,6 +726,7 @@ export class Client
         $("#profile-btn").on('click', function() {
             $("#profile-username").val(client.current_user.username);
             $("#profile-email").val(client.current_user.email)
+	    $("#profile-nickname").val(client.current_user.nickname);
         });
 
         $("#profilebarcode-btn").on('click', function()
@@ -767,6 +772,12 @@ export class Client
                 $("#setpassword-confirm-div").addClass('hidden');
             }
         });
+
+	$("#personalinfoform").on('submit', function(e) {
+	    client.log.info("Begin personal info change request.");
+	    e.preventDefault();
+	    client.server_channel.change_personal_info($("#profile-nickname").val());
+	});
 
         $("#setpassword-confirm").on('input', function(e)
                 {

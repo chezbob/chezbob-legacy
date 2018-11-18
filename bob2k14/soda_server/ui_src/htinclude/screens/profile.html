@@ -11,7 +11,7 @@
             </div>
         </div>
         <div class="col-xs-7">
-            <form class="form-horizontal">
+            <form class="form-horizontal" id="personalinfoform">
                 <div class="form-group">
                      <label for="profile-username" class="control-label">
                         Username
@@ -24,9 +24,16 @@
                      </label>
                      <input type="text" id="profile-email" class="form-control" readonly>
                 </div>
+		<div class="form-group">
+                     <label for="profile-nickname" class="control-label">
+                        Preferred Name
+                     </label>
+                     <input type="text" id="profile-nickname" class="form-control">
+                </div>
                 <div class="form-group">
                     If you need to change your username or e-mail, please contact ChezBob staff.
                 </div>
+                <button type="submit" class="btn btn-primary btn-lg">Update</button>
             </form>
         </div>
     </div>

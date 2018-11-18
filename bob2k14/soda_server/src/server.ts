@@ -569,6 +569,29 @@ class sodad_server {
         return redisclient.hsetAsync("sodads:" + client, "learn", learnmode);
     }
 
+    change_personal_info(server: sodad_server, client: string, nickname: string)
+    {
+	return redisclient.hgetAsync("sodads:" + client, "uid")
+	    .then(uid => {
+		return models.Users.find({ where: { userid: uid } });
+	    })
+	    .then(user => {
+		if (user == null) {
+		    throw "Couldn't find user";
+		}
+
+		return user.updateAttributes({ nickname: nickname });
+	    })
+	    .then(updated_user => {
+		log.info("Successfully updated nickname to " + nickname + " for user " + updated_user.username + " on client " + client);
+		server.clientchannels[client].displayerror("fa-check", "Update success", "Personal info updated");
+		server.updateuser(server, client);
+	    })
+	    .catch(error => {
+		log.info("Failed to update nickname due to " + error);
+		server.clientchannels[client].displayerror("fa-close", "Update failure", "Couldn't update personal info: " + error);
+	    });
+    }
 
     changepassword (server: sodad_server, client: string, enabled: boolean,
             newpassword: string, oldpassword: string)
@@ -1570,6 +1593,12 @@ class sodad_server {
                 log.info("Submitting an comment report for client " + client);
                 return server.comment_report(server, client, report, anonymous);
             },
+	    change_personal_info: function(nickname)
+	    {
+	        var client = this.id;
+		log.info("Changing nickname to " + nickname + " for client " + client);
+		return server.change_personal_info(server, client, nickname);
+	    },
             changepassword: function(enable, newpassword, oldpassword)
             {
                 var client = this.id;
