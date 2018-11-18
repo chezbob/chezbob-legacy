@@ -605,6 +605,59 @@ class sodad_server {
                                 })
     }
 
+    cancel_transaction (server: sodad_server, client: string, trans_id : number)
+    {
+        return redisclient.hgetAsync("sodads:" + client, "uid")
+        .then(function (uid){
+            if (uid == null)
+            { throw "User could not be found from session."; }
+            return models.Transactions.find({
+                where: { userid : uid, id : trans_id }
+            });
+        })
+        .then(function (xact) {
+
+            var transType = "BUY";
+            if(xact.xacttype.substring(0, transType.length) !== transType){
+                server.clientchannels[client].displayerror("fa-warning", "Failed to Cancel Transaction", "Can only cancel transactions where you bought something");
+                return;
+            }
+
+            var amt = xact.xactvalue;
+            if(parseFloat(amt) >= 0 || amt[0] != '-') {
+                throw "Unexpected transaction amount";
+                return;
+            }
+
+            //Convert the value of the expenditure to a positive amount
+            var restoreAmount = amt.slice(1);
+            return redisclient.hgetallAsync("sodads:" + client)
+            .then(function(udata) {
+                log.info("Cancel transaction from " + udata.username + " id: " + trans_id + " amt: " + restoreAmount);
+                var mailOpts = {
+                    from: server.initdata.cbemail,
+                    to: server.initdata.cbemail,
+                    cc: udata.email,
+                    subject: '[cb_canceltrans] Transaction ' + trans_id + ' cancelled, user: ' + udata.username + ' amt: ' + restoreAmount,
+                    html: 'User ' + udata.username + " cancelled transaction " + trans_id + " for amount :<br/><br/>" + restoreAmount,
+                    text: 'User ' + udata.username + " cancelled transaction " + trans_id + " for amount :\n\n" + restoreAmount,
+                };
+                return mailtransport.sendMailAsync(mailOpts);
+            })
+            .then(function (response) {
+                log.info("Cancelling transaction");
+                server.balance_transaction(server, client, "ADD " + restoreAmount + " (cancelled transaction " + trans_id + ")",
+                "Deposit " + restoreAmount + " (cancelled transaction " + trans_id + ")", null, restoreAmount);
+                server.clientchannels[client].displayerror("fa-check", "Canceled Transaction", "Transaction " + trans_id + " has been canceled. Account has been credited with $" + restoreAmount);
+                server.updateuser(server, client);
+            });
+        })
+        .catch(function (e) {
+            log.error("Failed to Cancel Transaction " + e);
+            server.clientchannels[client].displayerror("fa-warning", "Failed to Cancel Transaction", "Failed to Cancel Transaction");
+        });
+    }
+
     //maybe make this a library function
     debunyanize (log: string[], callback: (Object, string) => void)
     {
@@ -1575,6 +1628,12 @@ class sodad_server {
                 var client = this.id;
                 log.info("Setting password (enabled=" + enable + ") for client " + client);
                 return server.changepassword(server, client, enable, newpassword, oldpassword);
+            },
+            cancel_transaction:function(trans_id)
+            {
+                var client = this.id;
+                log.info("Cancellng transaction for client " + client);
+                return server.cancel_transaction(server, client, trans_id);
             },
             vendstock: function()
             {
