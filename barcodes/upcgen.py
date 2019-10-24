@@ -18,7 +18,7 @@ __author__ = "Michael Vrable <mvrable@cs.ucsd.edu>"
 
 import re
 import sys
-import Image
+from PIL import Image
 
 # Binary encodings of digits in UPC barcodes.  These are the L encodings, used
 # for the left half of the barcode; the R encodings used in the right half are
@@ -71,7 +71,7 @@ def upc_to_bits(digits):
 
 def bits_to_image(bits, height=50):
     rawbits = "".join([{'0': '\377', '1': '\0'}[c] for c in bits])
-    im = Image.fromstring('L', (len(bits), 1), rawbits)
+    im = Image.frombytes('L', (len(bits), 1), rawbits)
     return im.resize((len(bits), height)).convert('1')
 
 def html_escape(text):
