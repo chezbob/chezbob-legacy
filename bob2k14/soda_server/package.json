@@ -52,7 +52,7 @@
     "gulp-type": "^0.3.0",
     "gulp-uglify": "^1.0.1",
     "jayson": "^1.1.1",
-    "jquery": "^2.1.1",
+    "jquery": "^3.5.0",
     "jsesc": "^0.5.0",
     "pkginfo": "^0.3.0",
     "serialport": "^1.4.6",
