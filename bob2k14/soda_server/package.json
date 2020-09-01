@@ -80,7 +80,7 @@
     "q": "^1.0.1",
     "query-string": "^1.0.0",
     "redis": "^0.12.1",
-    "sequelize": "^2.0.0-rc1",
+    "sequelize": "^5.15.1",
     "sqlite3": "^3.0.2",
     "socket.io": "^1.1.0",
     "socket.io-rpc": "^0.5.4",
