@@ -1,0 +1,22 @@
+<div id="transactions-cancel" class="ui-screen">
+    <div class="row">
+        <div class="col-xs-5">
+            <div class="list-group">
+                @@include('snippets/tsidebutton.html', {
+                    "id" : "transactions-exitbtn",
+                    "target" : "transactions",
+                    "fa" : "fa-sign-out",
+                    "text" : "Back"
+                })
+            </div>
+        </div>
+        <div class="col-xs-7">
+            <p class="lead">An email will be sent to the Chez Bob admins about this canceled transaction to check for abuse. Are you sure you want to proceed?</p>
+            <p class="lead">Transaction Id: </p>
+            <p class="lead" id="cancel-trans-id">0</p>
+            <p class="lead">Transaction Amount: </p>
+            <p class="lead" id="cancel-trans-amount">0.00</p>
+            <a href='#' class='btn btn-info' id='transactioncancel'>Cancel Transaction</a>
+        </div>
+    </div>
+</div>

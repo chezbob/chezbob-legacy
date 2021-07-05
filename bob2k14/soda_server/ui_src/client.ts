@@ -296,7 +296,8 @@ export class Client
                     });
 
                 $(".transactiondetail").on('click', function(e) {
-                    var xact = client.currenttransactions[$(this).data('id')];
+                    var arrIndex = $(this).data('id');
+                    var xact = client.currenttransactions[arrIndex];
                     $("#transactiondetails-table tbody").empty();
                     $("#transactiondetails-table tbody").append('<tr><td>Id</td><td>' + xact.id + '<td></tr>');
                     $("#transactiondetails-table tbody").append('<tr><td>Time</td><td>' + xact.xacttime + '<td></tr>');
@@ -305,8 +306,9 @@ export class Client
                     $("#transactiondetails-table tbody").append('<tr><td>Source</td><td>' + xact.source + '<td></tr>');
                     $("#transactiondetails-table tbody").append('<tr><td>Barcode</td><td>' + xact.barcode + '<td></tr>');
                     $("#transactiondetails-table tbody").append('<tr><td>User ID</td><td>' + xact.userid + '<td></tr>');
+                    $("#transactioncancelui").data('id', arrIndex);
                     client.setUIscreen(client, 'transactions-detail');
-        });
+                });
 
             }
         );
@@ -970,6 +972,20 @@ export class Client
                             });
                     }
                 });
+
+        $("#transactioncancelui").on('click', function() {
+            var arrIndex = $(this).data('id');
+            var xact = client.currenttransactions[arrIndex];
+            $("#cancel-trans-id").text(xact.id);
+            $("#cancel-trans-amount").text(xact.xactvalue);
+            $("#transactioncancel").data('id', arrIndex);
+            client.setUIscreen(client, 'transactions-cancel');
+        });
+
+        $("#transactioncancel").on('click', function(e) {
+            var xact = client.currenttransactions[$(this).data('id')];
+            client.server_channel.cancel_transaction(xact.id);
+        });
     }
 
 
